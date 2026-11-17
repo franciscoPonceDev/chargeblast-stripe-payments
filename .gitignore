@@ -1,6 +1,6 @@
-!.env.example
 *.pdf
 .env*
+!.env.example
 .next/
 .superpowers/
 email.md

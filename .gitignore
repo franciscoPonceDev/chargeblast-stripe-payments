@@ -1,6 +1,7 @@
+!.env.example
 *.pdf
+.env*
+.next/
+.superpowers/
 email.md
 node_modules/
-.next/
-.env*
-!.env.example

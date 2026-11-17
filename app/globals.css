@@ -25,6 +25,14 @@
   --color-badge-warning-bg: #fcedb9;
   --color-badge-warning-fg: #a82c00;
 
+  --color-mark-visa: #1a1f71;
+  --color-mark-mastercard: #eb001b;
+  --color-mark-amex: #006fcf;
+  --color-mark-discover: #f76f20;
+  --color-mark-apple: #000000;
+  --color-mark-google: #ffffff;
+  --color-mark-link: #00d66f;
+
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 8px;

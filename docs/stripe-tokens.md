@@ -12,7 +12,7 @@ Source of truth: `app/globals.css` (`@theme`). Current values are provisional; t
 | `--color-surface` | `#ffffff` | — |
 | `--color-brand` | `#635bff` | — |
 | `--color-brand-hover` | `#5851e0` | — |
-| `--color-on-brand` | `#ffffff` | � |
+| `--color-on-brand` | `#ffffff` | � |
 | `--color-brand-ring` | `rgb(99 91 255 / 0.4)` | — |
 | `--color-bg-hover` | `#f5f6f8` | — |
 | `--color-badge-success-bg` | `#d1fab3` | — |
@@ -31,6 +31,13 @@ Source of truth: `app/globals.css` (`@theme`). Current values are provisional; t
 | `--text-base` / line-height | `14px` / `20px` | — |
 | `--text-xs` / line-height | `12px` / `16px` | — |
 | `--text-table` / line-height | `13px` / `20px` | — |
-| `--size-control-sm` | `24px` | � |
-| `--size-control-md` | `28px` | � |
-| `--size-checkbox` | `14px` | � |
+| `--size-control-sm` | `24px` | � |
+| `--size-control-md` | `28px` | � |
+| `--size-checkbox` | `14px` | � |
+| `--color-mark-visa` | `#1a1f71` | generic chip color, not a logo |
+| `--color-mark-mastercard` | `#eb001b` | generic chip color, not a logo |
+| `--color-mark-amex` | `#006fcf` | generic chip color, not a logo |
+| `--color-mark-discover` | `#f76f20` | generic chip color, not a logo |
+| `--color-mark-apple` | `#000000` | generic chip color, not a logo |
+| `--color-mark-google` | `#ffffff` | generic chip color, not a logo |
+| `--color-mark-link` | `#00d66f` | generic chip color, not a logo |

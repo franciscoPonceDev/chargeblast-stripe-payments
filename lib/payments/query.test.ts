@@ -96,6 +96,9 @@ describe('filterPayments', () => {
     it('id prefix', () => {
       expect(ids(filterPayments(rows, q({ search: 'pi_ab' }), NOW))).toEqual([alice.id]);
     });
+    it('short digits match last4', () => {
+      expect(ids(filterPayments(rows, q({ search: '42' }), NOW))).toEqual([k.id]);
+    });
     it('customer name', () => {
       expect(ids(filterPayments(rows, q({ search: 'danvers' }), NOW))).toEqual([named.id]);
     });
@@ -140,6 +143,11 @@ describe('filterPayments', () => {
       expect(ids(ordered)).toEqual([x.id]);
       expect(ids(rev)).toEqual(ids(ordered));
     });
+    it('custom to only', () => {
+      const x = make({ created: Date.UTC(2026, 10, 12, 23, 59) });
+      const y = make({ created: Date.UTC(2026, 10, 13) });
+      expect(ids(filterPayments([x, y], q({ date: { preset: 'custom', from: null, to: '2026-11-12' } }), NOW))).toEqual([x.id]);
+    });
     it('invalid strings are open', () => {
       expect(filterPayments(rows, q({ date: { preset: 'custom', from: 'garbage', to: null } }), NOW)).toHaveLength(6);
     });
@@ -169,6 +177,21 @@ describe('filterPayments', () => {
     });
     it('NaN is no filter', () => {
       expect(filterPayments(rows, q({ amount: { op: 'gt', value: NaN } }), NOW)).toHaveLength(4);
+    });
+    it('threshold is not rounded', () => {
+      const u989 = make({ amount: 989 });
+      const u988 = make({ amount: 988 });
+      expect(ids(filterPayments([u988, u989], q({ amount: { op: 'gt', value: 9.886 } }), NOW))).toEqual([u989.id]);
+      const y1001 = make({ amount: 1001, currency: 'jpy' });
+      const y1000 = make({ amount: 1000, currency: 'jpy' });
+      expect(ids(filterPayments([y1000, y1001], q({ amount: { op: 'gt', value: 1000.5 } }), NOW))).toEqual([y1001.id]);
+    });
+    it('jpy decimals', () => {
+      const y500 = make({ amount: 500, currency: 'jpy' });
+      const u50000 = make({ amount: 50000 }); // 500.00 usd
+      const u100000 = make({ amount: 100000 }); // 1000.00 usd
+      expect(ids(filterPayments([y500, u50000], q({ amount: { op: 'eq', value: 500 } }), NOW))).toEqual([y500.id, u50000.id]);
+      expect(ids(filterPayments([y500, u100000], q({ amount: { op: 'lt', value: 600 } }), NOW))).toEqual([y500.id]);
     });
   });
 
@@ -227,6 +250,9 @@ describe('applyQuery', () => {
   });
   it('clamps negative page', () => {
     expect(applyQuery(sixty, q({ page: -3 }), NOW).page).toBe(0);
+  });
+  it('empty with high page', () => {
+    expect(applyQuery([], q({ page: 3 }), NOW)).toEqual({ rows: [], total: 0, page: 0, pageCount: 1 });
   });
   it('empty', () => {
     const r = applyQuery([], DEFAULT_QUERY, NOW);

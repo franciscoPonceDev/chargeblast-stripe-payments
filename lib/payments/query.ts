@@ -115,26 +115,19 @@ function dateBounds(f: DateFilter, now: number): [number | null, number | null] 
   }
 }
 
+const EPS = 1e-9;
+
 function matchesAmount(p: Payment, f: AmountFilter): boolean {
   if (f.op === 'any') return true;
   const v = majorAmount(p);
-  // Compare at the currency's precision to avoid float noise (e.g. 9.88).
-  const dec = currencyDecimals(p.currency);
-  const r = (n: number) => Math.round(n * 10 ** dec);
-  const minor = r(v);
   if (f.op === 'between') {
     if (Number.isNaN(f.min) || Number.isNaN(f.max)) return true;
     const lo = Math.min(f.min, f.max);
     const hi = Math.max(f.min, f.max);
-    return minor >= r(lo) && minor <= r(hi);
+    return v >= lo - EPS && v <= hi + EPS;
   }
   if (Number.isNaN(f.value)) return true;
-  if (!Number.isFinite(f.value)) {
-    // +/-Infinity: gt/lt/eq compare naturally on the major amount.
-    return f.op === 'gt' ? v > f.value : f.op === 'lt' ? v < f.value : v === f.value;
-  }
-  const t = r(f.value);
-  return f.op === 'eq' ? minor === t : f.op === 'gt' ? minor > t : minor < t;
+  return f.op === 'eq' ? Math.abs(v - f.value) < EPS : f.op === 'gt' ? v > f.value + EPS : v < f.value - EPS;
 }
 
 export function filterPayments(all: Payment[], q: PaymentsQuery, now: number): Payment[] {

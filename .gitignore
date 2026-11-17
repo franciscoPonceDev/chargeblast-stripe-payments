@@ -5,3 +5,16 @@
 .superpowers/
 email.md
 node_modules/
+
+# next/scaffold
+/.pnp
+.pnp.js
+/coverage
+/out/
+/build
+.DS_Store
+*.pem
+npm-debug.log*
+.vercel
+*.tsbuildinfo
+next-env.d.ts

@@ -7,11 +7,11 @@ export function nextSort(sort: SortState[], id: SortKey, shift: boolean): SortSt
     if (!cur) return [...sort, { id, desc: true }];
     if (cur.desc) return sort.map((s) => (s.id === id ? { id, desc: false } : s));
     const rest = sort.filter((s) => s.id !== id);
-    return rest.length ? rest : DEFAULT_QUERY.sort;
+    return rest.length ? rest : DEFAULT_QUERY.sort.map((x) => ({ ...x }));
   }
   if (!cur || sort.length > 1) return [{ id, desc: true }];
   if (cur.desc) return [{ id, desc: false }];
-  return DEFAULT_QUERY.sort;
+  return DEFAULT_QUERY.sort.map((x) => ({ ...x }));
 }
 
 export function SortHeader({

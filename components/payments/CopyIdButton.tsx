@@ -5,17 +5,28 @@ import { Icon, Tooltip } from "@/components/ui";
 export function CopyIdButton({ id }: { id: string }) {
   const [copied, setCopied] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
-  useEffect(() => () => clearTimeout(timer.current), []);
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      clearTimeout(timer.current);
+    };
+  }, []);
 
   async function copy() {
+    const c = navigator.clipboard;
+    if (!c) return;
     try {
-      await navigator.clipboard?.writeText(id);
-      if (!navigator.clipboard) return;
+      await c.writeText(id);
+      if (!mounted.current) return;
       setCopied(true);
       clearTimeout(timer.current);
-      timer.current = setTimeout(() => setCopied(false), 1500);
+      timer.current = setTimeout(() => {
+        if (mounted.current) setCopied(false);
+      }, 1500);
     } catch {
-      /* clipboard unavailable or rejected: do nothing */
+      /* rejected: do nothing */
     }
   }
 
@@ -31,11 +42,9 @@ export function CopyIdButton({ id }: { id: string }) {
           <Icon name="copy" size={12} />
         </button>
       </Tooltip>
-      {copied && (
-        <span role="status" className="ml-1 text-xs text-text-secondary">
-          Copied
-        </span>
-      )}
+      <span role="status" className={copied ? "ml-1 text-xs text-text-secondary" : "sr-only"}>
+        {copied ? "Copied" : ""}
+      </span>
     </span>
   );
 }

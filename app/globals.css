@@ -28,7 +28,7 @@
   --color-mark-visa: #1a1f71;
   --color-mark-mastercard: #eb001b;
   --color-mark-amex: #006fcf;
-  --color-mark-discover: #f76f20;
+  --color-mark-discover: #c2410c;
   --color-mark-apple: #000000;
   --color-mark-google: #ffffff;
   --color-mark-link: #00d66f;
@@ -46,6 +46,8 @@
 
   --text-body: 14px;
   --text-body--line-height: 20px;
+  --text-mark: 8px;
+  --text-mark--line-height: 10px;
   --text-table: 13px;
   --text-table--line-height: 20px;
 }

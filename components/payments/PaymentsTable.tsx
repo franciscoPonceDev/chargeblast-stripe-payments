@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -28,6 +28,15 @@ export function PaymentsTable({
   const columns = useMemo(() => buildColumns({ sort, onSortChange, now }), [sort, onSortChange, now]);
   const sorting: SortingState = sort;
 
+  useEffect(() => {
+    const ids = new Set(rows.map((r) => r.id));
+    setRowSelection((prev) => {
+      const keys = Object.keys(prev);
+      if (keys.every((k) => ids.has(k))) return prev;
+      return Object.fromEntries(keys.filter((k) => ids.has(k)).map((k) => [k, true]));
+    });
+  }, [rows]);
+
   const table = useReactTable({
     data: rows,
     columns,
@@ -40,7 +49,7 @@ export function PaymentsTable({
   });
 
   const ariaSort = (id: string) => {
-    const s = sort.find((x) => x.id === id);
+    const s = sort[0]?.id === id ? sort[0] : undefined;
     return s ? (s.desc ? "descending" : "ascending") : undefined;
   };
 

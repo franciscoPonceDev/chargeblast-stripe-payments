@@ -1,6 +1,6 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { SortState } from "@/lib/payments/query";
 import type { Payment, PaymentStatus } from "@/lib/payments/types";
 import { PaymentsTable, EMPTY_MESSAGE } from "./PaymentsTable";
@@ -32,6 +32,13 @@ function setup(over: { rows?: Payment[]; sort?: SortState[] } = {}) {
   );
   return onSortChange;
 }
+
+const origClipboard = Object.getOwnPropertyDescriptor(navigator, "clipboard");
+afterEach(() => {
+  vi.useRealTimers();
+  if (origClipboard) Object.defineProperty(navigator, "clipboard", origClipboard);
+  else delete (navigator as unknown as Record<string, unknown>).clipboard;
+});
 
 describe("PaymentsTable", () => {
   it("renders header labels in order", () => {
@@ -132,13 +139,68 @@ describe("PaymentsTable", () => {
   });
 
   it("copy rejection shows nothing", async () => {
-    Object.defineProperty(navigator, "clipboard", {
-      value: { writeText: vi.fn().mockRejectedValue(new Error("no")) },
-      configurable: true,
-    });
+    const writeText = vi.fn().mockRejectedValue(new Error("no"));
+    Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });
     setup({ rows: [mk(1)] });
     await userEvent.click(screen.getByRole("button", { name: "Copy payment ID" }));
+    await waitFor(() => expect(writeText).toHaveBeenCalledTimes(1));
+    await act(async () => {});
     expect(screen.queryByText("Copied")).toBeNull();
+  });
+
+  it("Copied disappears after 1.5s", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });
+    setup({ rows: [mk(1)] });
+    fireEvent.click(screen.getByRole("button", { name: "Copy payment ID" }));
+    expect(await screen.findByText("Copied")).toBeInTheDocument();
+    await act(async () => {
+      vi.advanceTimersByTime(1600);
+    });
+    expect(screen.queryByText("Copied")).toBeNull();
+  });
+
+  it("shift-click on desc column toggles to asc in place", () => {
+    const a = setup({ sort: [{ id: "amount", desc: true }, { id: "created", desc: true }] });
+    fireEvent.click(screen.getByRole("button", { name: "Amount" }), { shiftKey: true });
+    expect(a).toHaveBeenCalledWith([{ id: "amount", desc: false }, { id: "created", desc: true }]);
+  });
+
+  it("shift-click on asc column removes it", () => {
+    const a = setup({ sort: [{ id: "amount", desc: false }, { id: "created", desc: true }] });
+    fireEvent.click(screen.getByRole("button", { name: "Amount" }), { shiftKey: true });
+    expect(a).toHaveBeenCalledWith([{ id: "created", desc: true }]);
+  });
+
+  it("shift-click removing the only sort restores default", () => {
+    const a = setup({ sort: [{ id: "amount", desc: false }] });
+    fireEvent.click(screen.getByRole("button", { name: "Amount" }), { shiftKey: true });
+    expect(a).toHaveBeenCalledWith(DEFAULT);
+  });
+
+  it("plain click on another column while multi-sorted gives single sort", async () => {
+    const a = setup({ sort: [{ id: "amount", desc: true }, { id: "created", desc: true }] });
+    await userEvent.click(screen.getByRole("button", { name: "Status" }));
+    expect(a).toHaveBeenCalledWith([{ id: "status", desc: true }]);
+  });
+
+  it("aria-sort only on primary column", () => {
+    setup({ sort: [{ id: "amount", desc: true }, { id: "created", desc: true }] });
+    expect(screen.getByRole("columnheader", { name: "Amount" })).toHaveAttribute("aria-sort", "descending");
+    expect(screen.getByRole("columnheader", { name: "Date" })).not.toHaveAttribute("aria-sort");
+  });
+
+  it("selection survives re-sort and is pruned when rows disappear", async () => {
+    const onSortChange = vi.fn();
+    const id0 = rows[0].id;
+    const { rerender } = render(<PaymentsTable rows={rows} sort={DEFAULT} onSortChange={onSortChange} now={NOW} />);
+    await userEvent.click(screen.getByRole("checkbox", { name: `Select payment ${id0}` }));
+    rerender(<PaymentsTable rows={[...rows].reverse()} sort={DEFAULT} onSortChange={onSortChange} now={NOW} />);
+    expect(screen.getByRole("checkbox", { name: `Select payment ${id0}` })).toHaveAttribute("aria-checked", "true");
+    rerender(<PaymentsTable rows={[rows[1], rows[2]]} sort={DEFAULT} onSortChange={onSortChange} now={NOW} />);
+    rerender(<PaymentsTable rows={rows} sort={DEFAULT} onSortChange={onSortChange} now={NOW} />);
+    expect(screen.getByRole("checkbox", { name: `Select payment ${id0}` })).toHaveAttribute("aria-checked", "false");
   });
 
   it("badge text per status", () => {

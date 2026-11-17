@@ -14,7 +14,7 @@ const WALLETS: Record<WalletKind, { text: string; cls: string; label: string }> 
 };
 
 const BASE =
-  "inline-flex h-4 w-6 shrink-0 items-center justify-center rounded-sm text-[7px] font-bold leading-none";
+  "inline-flex h-4 w-6 shrink-0 items-center justify-center rounded-sm text-mark font-bold leading-none";
 
 export function BrandMark({ brand }: { brand: CardBrand }) {
   const b = BRANDS[brand];

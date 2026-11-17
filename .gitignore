@@ -1,0 +1,6 @@
+*.pdf
+email.md
+node_modules/
+.next/
+.env*
+!.env.example

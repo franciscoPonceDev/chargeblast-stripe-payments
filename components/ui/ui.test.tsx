@@ -12,7 +12,18 @@ describe("Button", () => {
   });
   it("renders an icon", () => {
     render(<Button icon="plus">Add</Button>);
-    expect(document.querySelector("svg")).toBeInTheDocument();
+    const svg = screen.getByRole("button", { name: "Add" }).querySelector("svg");
+    expect(svg).toBeInTheDocument();
+    expect(svg).toHaveAttribute("aria-hidden", "true");
+  });
+  it("fires onClick, but not when disabled", async () => {
+    const onClick = vi.fn();
+    const { rerender } = render(<Button onClick={onClick}>Go</Button>);
+    await userEvent.click(screen.getByRole("button", { name: "Go" }));
+    expect(onClick).toHaveBeenCalledTimes(1);
+    rerender(<Button onClick={onClick} disabled>Go</Button>);
+    await userEvent.click(screen.getByRole("button", { name: "Go" }));
+    expect(onClick).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -40,7 +51,25 @@ describe("Checkbox", () => {
   });
 });
 
+describe("Checkbox keyboard", () => {
+  it("toggles with Space", async () => {
+    const onChange = vi.fn();
+    render(<Checkbox checked={false} onCheckedChange={onChange} aria-label="Pick" />);
+    screen.getByRole("checkbox", { name: "Pick" }).focus();
+    await userEvent.keyboard(" ");
+    expect(onChange).toHaveBeenCalledWith(true);
+  });
+});
+
 describe("Tooltip", () => {
+  it("is absent before hover", () => {
+    render(
+      <Tooltip content="Helpful">
+        <button>Hover me</button>
+      </Tooltip>,
+    );
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+  });
   it("shows content on hover", async () => {
     render(
       <Tooltip content="Helpful">
@@ -61,6 +90,20 @@ describe("Popover", () => {
     );
     await userEvent.click(screen.getByText("Open"));
     expect(await screen.findByText("Panel body")).toBeInTheDocument();
+  });
+});
+
+describe("Popover close", () => {
+  it("closes on Escape", async () => {
+    render(
+      <Popover trigger={<button>Open</button>} aria-label="Panel">
+        <div>Panel body</div>
+      </Popover>,
+    );
+    await userEvent.click(screen.getByText("Open"));
+    expect(await screen.findByText("Panel body")).toBeInTheDocument();
+    await userEvent.keyboard("{Escape}");
+    expect(screen.queryByText("Panel body")).not.toBeInTheDocument();
   });
 });
 

@@ -13,6 +13,7 @@
   --color-surface: #ffffff;
   --color-brand: #635bff;
   --color-brand-hover: #5851e0;
+  --color-on-brand: #ffffff;
   --color-brand-ring: rgb(99 91 255 / 0.4);
   --color-bg-hover: #f5f6f8;
   --color-badge-success-bg: #d1fab3;
@@ -31,10 +32,12 @@
   --shadow-button: 0 1px 1px rgb(0 0 0 / 0.08);
   --shadow-popover: 0 7px 14px rgb(48 49 61 / 0.08), 0 3px 6px rgb(0 0 0 / 0.12);
 
-  --text-base: 14px;
-  --text-base--line-height: 20px;
-  --text-xs: 12px;
-  --text-xs--line-height: 16px;
+  --size-control-sm: 24px;
+  --size-control-md: 28px;
+  --size-checkbox: 14px;
+
+  --text-body: 14px;
+  --text-body--line-height: 20px;
   --text-table: 13px;
   --text-table--line-height: 20px;
 }
@@ -43,6 +46,8 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Ubuntu, sans-serif;
   background: var(--color-surface);
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
   color: var(--color-text-primary);
   -webkit-font-smoothing: antialiased;
 }

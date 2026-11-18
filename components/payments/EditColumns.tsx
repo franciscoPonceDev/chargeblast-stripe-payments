@@ -54,7 +54,7 @@ export function EditColumns({ settings, onColumnVisibleChange, onWrapChange, onR
           <label
             key={c.id}
             title={c.locked ? "Amount is always shown" : undefined}
-            className="flex h-8 items-center py-1.5 pl-1 text-body leading-5"
+            className="flex h-8 items-center gap-2 py-1.5 pl-1 text-body leading-5"
           >
             <Checkbox
               aria-label={c.label}

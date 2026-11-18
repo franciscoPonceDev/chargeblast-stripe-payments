@@ -1,4 +1,5 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { memo, useEffect, useMemo, useState } from "react";
 import {
   flexRender,
@@ -19,6 +20,8 @@ function padFor(id: string) {
   return "px-(--space-cell-x)";
 }
 
+const INTERACTIVE = "a, button, input, label, [role='checkbox'], [role='button']";
+
 export const EMPTY_MESSAGE = "No results found";
 
 function PaymentsTableImpl({
@@ -32,6 +35,7 @@ function PaymentsTableImpl({
   onSortChange: (s: SortState[]) => void;
   now: number;
 }) {
+  const router = useRouter();
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const columns = useMemo(() => buildColumns({ sort, onSortChange, now }), [sort, onSortChange, now]);
   const sorting: SortingState = sort;
@@ -91,7 +95,14 @@ function PaymentsTableImpl({
             </tr>
           ) : (
             bodyRows.map((row) => (
-              <tr key={row.id} className="group h-11 hover:bg-bg-hover focus-within:bg-bg-hover">
+              <tr
+                key={row.id}
+                className="group h-11 cursor-pointer hover:bg-bg-hover focus-within:bg-bg-hover"
+                onClick={(e) => {
+                  if ((e.target as Element).closest(INTERACTIVE)) return;
+                  router.push(`/payments/${row.original.id}`);
+                }}
+              >
                 {row.getVisibleCells().map((cell) => (
                   <td
                     key={cell.id}

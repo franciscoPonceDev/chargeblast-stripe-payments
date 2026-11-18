@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import clsx from "clsx";
 import { useId, useState } from "react";
 import { Icon, type IconName } from "@/components/ui";
@@ -99,7 +100,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           {MAIN.map((i) =>
             i.label === "Transactions" ? (
               <li key={i.label}>
-                <a
+                <Link
                   href="/payments"
                   aria-current="page"
                   onClick={onNavigate}
@@ -107,7 +108,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                 >
                   <IconBox name={i.icon} />
                   {i.label}
-                </a>
+                </Link>
               </li>
             ) : (
               <InertItem key={i.label} {...i} />

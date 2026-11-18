@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui";
 import { currencyCode, formatAmount, formatDateTime, shortenId } from "@/lib/format";
@@ -41,7 +42,13 @@ export function buildColumns({ sort, onSortChange, now }: ColumnCtx): ColumnDef<
       id: "amount",
       header: () => <SortHeader id="amount" label="Amount" sort={sort} onSortChange={onSortChange} align="right" />,
       cell: ({ row: { original: p } }) => (
-        <span className="font-semibold tabular-nums">{formatAmount(p.amount, p.currency)}</span>
+        <Link
+          href={`/payments/${p.id}`}
+          aria-label={`View payment ${shortenId(p.id)}`}
+          className="rounded-sm font-semibold tabular-nums hover:underline focus-visible:shadow-focus"
+        >
+          {formatAmount(p.amount, p.currency)}
+        </Link>
       ),
     },
     {

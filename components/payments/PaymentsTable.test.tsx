@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useRouter } from "next/navigation";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { SortState } from "@/lib/payments/query";
 import type { Payment, PaymentStatus } from "@/lib/payments/types";
@@ -221,5 +222,24 @@ describe("PaymentsTable", () => {
       expect(screen.getByText(l)).toBeInTheDocument();
       unmount();
     }
+  });
+
+  it("links the amount to the details page and navigates on row click", async () => {
+    setup();
+    const link = screen.getByRole("link", { name: /^View payment pi_1/ });
+    expect(link).toHaveAttribute("href", `/payments/${rows[0].id}`);
+    const push = vi.mocked(useRouter().push);
+    push.mockClear();
+    await userEvent.click(screen.getAllByRole("row")[2]);
+    expect(push).toHaveBeenCalledWith(`/payments/${rows[1].id}`);
+  });
+
+  it("does not navigate when clicking the checkbox or copy button", async () => {
+    setup();
+    const push = vi.mocked(useRouter().push);
+    push.mockClear();
+    await userEvent.click(screen.getByRole("checkbox", { name: `Select payment ${rows[0].id}` }));
+    await userEvent.click(screen.getAllByRole("button", { name: "Copy payment ID" })[0]);
+    expect(push).not.toHaveBeenCalled();
   });
 });

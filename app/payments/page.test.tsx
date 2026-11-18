@@ -17,42 +17,50 @@ import PaymentsPage from "./page";
 describe("PaymentsPage", { timeout: 30_000 }, () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    // The island fetches the full dataset from the static /api/payments route after hydration.
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, status: 200, json: async () => data })));
   });
   afterEach(() => {
+    vi.unstubAllGlobals();
     vi.useRealTimers();
   });
+  // Render the async Server Component's output, then let the stubbed fetch resolve.
+  const renderPage = async () => {
+    render(await PaymentsPage());
+    await act(async () => {});
+  };
   // Fully fake timers; delay:null removes userEvent's internal setTimeout waits and
 // pointerEventsCheck:0 skips per-click getComputedStyle walks over the 25-row table
 // (the slow part under CPU contention).
 const user = () =>
     userEvent.setup({ advanceTimers: vi.advanceTimersByTime, delay: null, pointerEventsCheck: 0 });
 
-  it("renders the Transactions heading and section tabs", () => {
-    render(<PaymentsPage />);
+  it("renders the Transactions heading and section tabs", async () => {
+    await renderPage();
     expect(screen.getByRole("heading", { name: "Transactions" })).toBeInTheDocument();
     expect(within(screen.getByRole("navigation", { name: "Transactions sections" })).getByRole("button", { name: "Payments" })).toHaveAttribute("aria-current", "page");
     expect(screen.getByRole("button", { name: "Create payment" })).toBeInTheDocument();
   });
   it("shows footer and paginates", async () => {
-    render(<PaymentsPage />);
+    await renderPage();
     expect(screen.getByText("Viewing 1–25 of 600 results")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Previous" })).toBeDisabled();
     await user().click(screen.getByRole("button", { name: "Next" }));
     expect(screen.getByText("Viewing 26–50 of 600 results")).toBeInTheDocument();
   });
-  it("changes page size", () => {
-    render(<PaymentsPage />);
+  it("changes page size", async () => {
+    await renderPage();
     fireEvent.change(screen.getByLabelText("Rows per page"), { target: { value: "100" } });
     expect(screen.getByText("Viewing 1–100 of 600 results")).toBeInTheDocument();
   });
   it("narrows by Failed tab", async () => {
-    render(<PaymentsPage />);
+    await renderPage();
     await user().click(screen.getByRole("tab", { name: "Failed" }));
     expect(screen.queryByText("Viewing 1–25 of 600 results")).not.toBeInTheDocument();
     expect(screen.getByText(/^Viewing 1–\d+ of \d+ results$/)).toBeInTheDocument();
   });
   it("shows empty state for no matches", async () => {
-    render(<PaymentsPage />);
+    await renderPage();
     await user().type(screen.getAllByLabelText("Search")[0], "zzzznomatch");
     await act(async () => {
       vi.advanceTimersByTime(250);
@@ -61,18 +69,18 @@ const user = () =>
     expect(screen.getByText("No results found")).toBeInTheDocument();
   });
   it("dismisses the banner", async () => {
-    render(<PaymentsPage />);
+    await renderPage();
     await user().click(screen.getByRole("button", { name: "Dismiss" }));
     expect(screen.queryByText(/Rule Attributes/)).not.toBeInTheDocument();
   });
   it("page size change from page 2 resets to page 1", async () => {
-    render(<PaymentsPage />);
+    await renderPage();
     await user().click(screen.getByRole("button", { name: "Next" }));
     fireEvent.change(screen.getByLabelText("Rows per page"), { target: { value: "50" } });
     expect(screen.getByText("Viewing 1–50 of 600 results")).toBeInTheDocument();
   });
   it("tab change from page 2 resets to page 1 with exact count", async () => {
-    render(<PaymentsPage />);
+    await renderPage();
     const failed = tabCounts(data as Payment[]).failed;
     await user().click(screen.getByRole("button", { name: "Next" }));
     await user().click(screen.getByRole("tab", { name: "Failed" }));
@@ -80,7 +88,7 @@ const user = () =>
     expect(screen.getByText(`Viewing 1–${end} of ${failed} results`)).toBeInTheDocument();
   });
   it("top-bar search resets to page 1", async () => {
-    render(<PaymentsPage />);
+    await renderPage();
     await user().click(screen.getByRole("button", { name: "Next" }));
     await user().type(screen.getAllByLabelText("Search")[0], "a");
     await act(async () => {
@@ -89,7 +97,7 @@ const user = () =>
     expect(screen.getByText(/^Viewing 1–\d+ of \d+ results$/)).toBeInTheDocument();
   });
   it("moves focus to the selected status tab after dismissing the banner", async () => {
-    render(<PaymentsPage />);
+    await renderPage();
     await user().click(screen.getByRole("button", { name: "Dismiss" }));
     expect(screen.getByRole("tab", { name: "All" })).toHaveFocus();
   });

@@ -50,6 +50,14 @@ describe("PaymentsTable", () => {
     ]);
   });
 
+  it("renders the row action group next to the resting … button", () => {
+    setup();
+    expect(screen.getAllByRole("button", { name: "More options" })).toHaveLength(rows.length);
+    for (const name of ["Refund payment", "Send receipt", "More actions"]) {
+      expect(screen.getAllByRole("button", { name })).toHaveLength(rows.length);
+    }
+  });
+
   it("renders one body row per payment", () => {
     setup();
     expect(screen.getAllByRole("row")).toHaveLength(4);

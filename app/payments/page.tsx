@@ -40,11 +40,11 @@ export default function PaymentsPage() {
       <div className="mt-(--space-section) flex flex-wrap items-center justify-between gap-2">
         <FilterBar query={query} onChange={update} />
         <div className="flex items-center gap-2">
-          <Button size="sm" icon="export">Export</Button>
-          <Button size="sm" icon="gear">Edit columns</Button>
+          <Button icon="export">Export</Button>
+          <Button icon="gear">Edit columns</Button>
         </div>
       </div>
-      <div className="mt-3 overflow-x-auto">
+      <div className="mt-4 overflow-x-auto">
         <PaymentsTable rows={result.rows} sort={query.sort} onSortChange={onSortChange} now={MOCK_NOW} />
       </div>
       <TableFooter

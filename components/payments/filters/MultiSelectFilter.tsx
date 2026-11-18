@@ -29,11 +29,12 @@ function MultiSelectForm<T extends string>({
   const toggle = (v: T, on: boolean) => setDraft((d) => (on ? [...d, v] : d.filter((x) => x !== v)));
   return (
     <FilterForm
+      dense
       canApply
       onApply={() => onApply(options.map((o) => o.value).filter((v) => draft.includes(v)))}
     >
       {options.map((o) => (
-        <label key={o.value} className="flex cursor-pointer items-center gap-2 text-body">
+        <label key={o.value} className="-mx-3 flex h-8 cursor-pointer items-center gap-2 rounded-sm px-3 text-body hover:bg-bg-hover">
           <Checkbox checked={draft.includes(o.value)} onCheckedChange={(on) => toggle(o.value, on)} aria-label={o.label} />
           {o.label}
         </label>

@@ -48,6 +48,7 @@ function DateForm({ value, onApply }: { value: DateFilter; onApply: (d: DateFilt
   const canApply = preset !== null && (preset !== "custom" || !!from || !!to);
   return (
     <FilterForm
+      dense
       canApply={canApply}
       onApply={() => {
         if (preset === "custom") {
@@ -58,7 +59,7 @@ function DateForm({ value, onApply }: { value: DateFilter; onApply: (d: DateFilt
       }}
     >
       {PRESETS.map((p) => (
-        <label key={p.id} className="flex cursor-pointer items-center gap-2 text-body">
+        <label key={p.id} className="-mx-3 flex h-8 cursor-pointer items-center gap-2 rounded-sm px-3 text-body hover:bg-bg-hover">
           <input
             type="radio"
             name="date-preset"

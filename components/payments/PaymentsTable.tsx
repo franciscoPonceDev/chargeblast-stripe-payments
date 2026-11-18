@@ -60,13 +60,13 @@ export function PaymentsTable({
       <table className="w-full border-collapse whitespace-nowrap text-table text-text-primary">
         <thead>
           {table.getHeaderGroups().map((hg) => (
-            <tr key={hg.id} className="border-b border-border-row">
+            <tr key={hg.id} className="h-10">
               {hg.headers.map((h) => (
                 <th
                   key={h.id}
                   scope="col"
                   aria-sort={ariaSort(h.column.id)}
-                  className={`px-2 py-2 font-semibold text-text-muted ${h.column.id === "amount" ? "text-right" : "text-left"}`}
+                  className={`${h.column.id === "select" ? "w-10 px-[13px]" : h.column.id === "actions" ? "sticky right-0 w-10 bg-surface px-2" : "px-4"} py-2.5 text-caption leading-5 font-semibold text-text-secondary shadow-[inset_0_-1px_0_var(--color-border-row)] ${h.column.id === "amount" ? "text-right" : "text-left"}`}
                 >
                   {flexRender(h.column.columnDef.header, h.getContext())}
                 </th>
@@ -77,17 +77,17 @@ export function PaymentsTable({
         <tbody>
           {bodyRows.length === 0 ? (
             <tr>
-              <td colSpan={columns.length} className="px-2 py-8 text-center text-text-muted">
+              <td colSpan={columns.length} className="px-4 py-8 text-center text-text-muted">
                 {EMPTY_MESSAGE}
               </td>
             </tr>
           ) : (
             bodyRows.map((row) => (
-              <tr key={row.id} className="group h-9 border-b border-border-row hover:bg-bg-hover">
+              <tr key={row.id} className="group h-11 hover:bg-bg-hover focus-within:bg-bg-hover">
                 {row.getVisibleCells().map((cell) => (
                   <td
                     key={cell.id}
-                    className={`px-2 py-1 ${cell.column.id === "amount" ? "text-right" : "text-left"}`}
+                    className={`${cell.column.id === "select" ? "px-[13px]" : cell.column.id === "actions" ? "sticky right-0 w-10 bg-surface px-2 group-focus-within:bg-bg-hover group-hover:bg-bg-hover" : "px-4"} py-0 shadow-[inset_0_-1px_0_var(--color-border-row)] ${cell.column.id === "amount" ? "text-right" : "text-left"}`}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>

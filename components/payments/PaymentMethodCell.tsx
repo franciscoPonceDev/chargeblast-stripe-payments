@@ -4,7 +4,7 @@ import { BrandMark, WalletMark } from "./BrandMark";
 
 export function PaymentMethodCell({ method }: { method: PaymentMethod }) {
   return (
-    <span className="inline-flex items-center gap-1.5">
+    <span className="inline-flex items-center gap-2">
       {method.type === "ach" ? (
         <Icon name="bank" size={16} className="text-text-muted" />
       ) : (

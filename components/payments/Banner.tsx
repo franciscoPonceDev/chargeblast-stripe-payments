@@ -7,13 +7,13 @@ export function Banner({ onDismiss }: { onDismiss?: () => void }) {
   const [open, setOpen] = useState(true);
   if (!open) return null;
   return (
-    <div className="flex items-center gap-2 rounded-md bg-bg-subtle px-3 py-2 text-body text-text-primary">
-      <span className="inline-flex items-center gap-1 rounded-sm bg-badge-neutral-bg px-1 text-caption font-semibold text-badge-neutral-fg">
+    <div className="flex items-center gap-4 rounded-lg bg-bg-subtle p-4 text-body text-text-secondary">
+      <span className="inline-flex items-center gap-1 rounded-sm bg-border-row px-1.5 text-caption leading-4 font-semibold text-text-secondary">
         <Icon name="info" size={12} />
         New
       </span>
       <span className="min-w-0 flex-1">Rule Attributes are now in Sigma and Data Pipeline for better fraud insights.</span>
-      <button type="button" className="cursor-pointer rounded-sm font-semibold text-brand outline-transparent hover:text-brand-hover focus-visible:ring-2 focus-visible:ring-brand-ring">
+      <button type="button" className="ml-8 cursor-pointer rounded-sm text-brand hover:text-brand-hover">
         Get started
       </button>
       <button
@@ -23,7 +23,7 @@ export function Banner({ onDismiss }: { onDismiss?: () => void }) {
           setOpen(false);
           onDismiss?.();
         }}
-        className="inline-flex size-6 cursor-pointer items-center justify-center rounded-sm text-text-muted outline-transparent hover:text-text-primary focus-visible:ring-2 focus-visible:ring-brand-ring"
+        className="-mr-2 inline-flex size-7 cursor-pointer items-center justify-center rounded-md text-brand-subtle hover:bg-border-row"
       >
         <Icon name="x" size={12} />
       </button>

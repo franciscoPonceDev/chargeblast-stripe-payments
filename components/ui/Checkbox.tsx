@@ -12,7 +12,7 @@ export function Checkbox({ checked, onCheckedChange, ...rest }: CheckboxProps) {
     <RC.Root
       checked={checked}
       onCheckedChange={(v) => onCheckedChange(v === true)}
-      className="flex size-(--size-checkbox) shrink-0 items-center justify-center rounded-sm border border-border bg-surface text-on-brand outline-transparent cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-ring data-[state=checked]:bg-brand data-[state=checked]:border-brand data-[state=indeterminate]:bg-brand data-[state=indeterminate]:border-brand"
+      className="flex size-(--size-checkbox) shrink-0 items-center justify-center rounded-sm bg-surface text-on-brand shadow-checkbox cursor-pointer data-[state=checked]:bg-brand data-[state=checked]:shadow-checkbox-checked data-[state=indeterminate]:bg-brand data-[state=indeterminate]:shadow-checkbox-checked"
       {...rest}
     >
       <RC.Indicator className="flex items-center justify-center">

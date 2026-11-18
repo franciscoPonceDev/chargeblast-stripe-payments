@@ -19,12 +19,12 @@ export function Popover({ trigger, children, open, onOpenChange, align = "start"
       <RP.Trigger asChild>{trigger}</RP.Trigger>
       <RP.Portal>
         <RP.Content
-          sideOffset={4}
+          sideOffset={6}
           align={align}
           aria-label={ariaLabel}
           aria-labelledby={labelledBy}
           className={clsx(
-            "z-50 rounded-lg border border-border bg-surface text-text-primary shadow-popover outline-transparent",
+            "z-50 rounded-lg border border-border bg-surface text-text-primary shadow-popover",
             className,
           )}
         >

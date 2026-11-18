@@ -5,23 +5,27 @@
    * Design tokens. Values are PROVISIONAL pending measurements recorded in
    * docs/stripe-tokens.md. Components must only use these tokens.
    */
-  --color-text-primary: #353a44;
-  --color-text-secondary: #596171;
-  --color-text-muted: #687385;
-  --color-border: #d8dee4;
-  --color-border-row: #ebeef1;
+  --color-text-primary: #1a2c44;
+  --color-text-secondary: #3c4f69;
+  --color-text-muted: #50617a;
+  --color-border: #d4dee9;
+  --color-border-row: #ecf1f6;
   --color-surface: #ffffff;
   --color-brand: #635bff;
   --color-brand-hover: #5851e0;
   --color-on-brand: #ffffff;
-  --color-brand-ring: rgb(99 91 255 / 0.4);
-  --color-bg-hover: #f5f6f8;
-  --color-badge-success-bg: #d1fab3;
+  --color-brand-subtle: #675dff;
+  --color-control: #273951;
+  --color-bg-hover: #f4f7fa;
+  --color-badge-success-bg: #eafcdd;
+  --color-badge-success-border: #a8f170;
   --color-badge-success-fg: #217005;
   --color-badge-danger-bg: #ffe7f2;
+  --color-badge-danger-border: #ffc2dc;
   --color-badge-danger-fg: #b3093c;
-  --color-badge-neutral-bg: #ebeef1;
-  --color-badge-neutral-fg: #545969;
+  --color-badge-neutral-bg: #f4f7fa;
+  --color-badge-neutral-border: #d4dee9;
+  --color-badge-neutral-fg: #50617a;
   --color-badge-warning-bg: #fcedb9;
   --color-badge-warning-fg: #a82c00;
 
@@ -37,17 +41,25 @@
   --radius-md: 6px;
   --radius-lg: 8px;
 
-  --shadow-button: 0 1px 1px rgb(0 0 0 / 0.08);
-  --shadow-popover: 0 7px 14px rgb(48 49 61 / 0.08), 0 3px 6px rgb(0 0 0 / 0.12);
+  --shadow-ring: 0 0 0 1px #d4dee9;
+  --shadow-popover: 0 0 0 0 rgb(0 0 0 / 0), 0 0 0 1px rgb(0 0 0 / 0), 0 0 0 0 rgb(0 0 0 / 0),
+    0 5px 15px 0 rgb(0 0 0 / 0.12), 0 15px 35px 0 rgb(48 49 61 / 0.08);
+  --shadow-checkbox: 0 0 0 1px #d4dee9, 0 1px 1px rgb(0 0 0 / 0.12), 0 2px 5px rgb(48 49 61 / 0.08);
+  --shadow-checkbox-checked: 0 0 0 1px #635bff, 0 1px 1px rgb(0 0 0 / 0.12), 0 2px 5px rgb(48 49 61 / 0.08);
+  --shadow-focus: 0 0 0 4px rgb(1 150 237 / 0.36);
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  --font-mono: "Source Code Pro", Menlo, Monaco, monospace;
 
   --size-control-sm: 24px;
   --size-control-md: 28px;
   --size-checkbox: 14px;
 
-  --color-bg-subtle: #f6f8fa;
+  --color-bg-subtle: #f4f7fa;
   --space-page-x: 32px;
-  --space-page-top: 24px;
-  --size-topbar: 56px;
+  --space-page-top: 16px;
+  --size-topbar: 60px;
   --size-search-max: 480px;
   --space-section: 16px;
   --space-page-bottom: 24px;
@@ -59,16 +71,21 @@
   --text-body--line-height: 20px;
   --text-mark: 8px;
   --text-mark--line-height: 10px;
-  --text-table: 13px;
+  --text-table: 14px;
   --text-table--line-height: 20px;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Ubuntu, sans-serif;
+  font-family: var(--font-sans);
   background: var(--color-surface);
   font-size: var(--text-body);
   line-height: var(--text-body--line-height);
   color: var(--color-text-primary);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Focus ring everywhere: 4px rgba(1,150,237,.36) (measured). */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
 }

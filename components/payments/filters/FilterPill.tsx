@@ -5,7 +5,7 @@ import clsx from "clsx";
 import { Button, Icon, Popover } from "@/components/ui";
 
 export const inputClass =
-  "h-(--size-control-md) w-full rounded-md border border-border bg-surface px-2 text-body text-text-primary outline-transparent focus-visible:ring-2 focus-visible:ring-brand-ring";
+  "h-(--size-control-md) w-full rounded-md bg-surface px-2 text-body text-text-primary shadow-ring";
 
 interface FilterPillProps {
   label: string;
@@ -27,7 +27,7 @@ export function FilterPill({ label, summary, onClear, title, children }: FilterP
   return (
     <div
       className={clsx(
-        "inline-flex h-(--size-control-sm) items-center rounded-full text-xs text-text-secondary",
+        "inline-flex h-(--size-control-md) items-center rounded-lg text-caption leading-4 font-semibold text-control",
         set && "border border-border bg-surface",
       )}
     >
@@ -39,7 +39,7 @@ export function FilterPill({ label, summary, onClear, title, children }: FilterP
             onClear();
             triggerRef.current?.focus();
           }}
-          className="ml-1 flex size-4 cursor-pointer items-center justify-center rounded-full outline-transparent hover:bg-bg-hover focus-visible:ring-2 focus-visible:ring-brand-ring"
+          className="ml-1 flex size-4 cursor-pointer items-center justify-center rounded-full hover:bg-bg-hover"
         >
           <Icon name="x" size={10} />
         </button>
@@ -48,16 +48,16 @@ export function FilterPill({ label, summary, onClear, title, children }: FilterP
         open={open}
         onOpenChange={setOpen}
         aria-labelledby={titleId}
-        className="w-[280px]"
+        className="w-[320px] p-3"
         trigger={
           <button
             ref={triggerRef}
             type="button"
             className={clsx(
-              "flex h-full cursor-pointer items-center gap-2 outline-transparent focus-visible:ring-2 focus-visible:ring-brand-ring",
+              "flex h-full cursor-pointer items-center gap-2 outline-transparent",
               set
-                ? "rounded-r-full pr-2 pl-1"
-                : "rounded-full border border-dashed border-border bg-surface px-2 enabled:hover:bg-bg-hover",
+                ? "rounded-r-lg pr-2 pl-1"
+                : "rounded-lg border border-dashed border-border bg-surface px-2 enabled:hover:bg-bg-hover",
             )}
           >
             {!set && <Icon name="circle-plus" />}
@@ -71,7 +71,7 @@ export function FilterPill({ label, summary, onClear, title, children }: FilterP
           </button>
         }
       >
-        <h2 id={titleId} className="border-b border-border-row px-4 py-3 text-body font-semibold">
+        <h2 id={titleId} className="mb-3 text-body font-semibold">
           {heading}
         </h2>
         {children(() => setOpen(false))}
@@ -84,10 +84,13 @@ export function FilterPill({ label, summary, onClear, title, children }: FilterP
 export function FilterForm({
   canApply,
   onApply,
+  dense,
   children,
 }: {
   canApply: boolean;
   onApply: () => void;
+  /** List-style body (radio/checkbox rows) with no gap between rows. */
+  dense?: boolean;
   children: ReactNode;
 }) {
   return (
@@ -97,8 +100,8 @@ export function FilterForm({
         if (canApply) onApply();
       }}
     >
-      <div className="flex flex-col gap-2 px-4 py-3">{children}</div>
-      <div className="px-4 pb-4">
+      <div className={clsx("flex flex-col", !dense && "gap-2")}>{children}</div>
+      <div className="mt-3">
         <Button type="submit" variant="primary" className="w-full" disabled={!canApply}>
           Apply
         </Button>

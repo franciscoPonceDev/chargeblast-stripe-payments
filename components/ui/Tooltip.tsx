@@ -16,7 +16,7 @@ export function Tooltip({ content, children, side = "top" }: TooltipProps) {
           <RT.Content
             side={side}
             sideOffset={4}
-            className="z-50 rounded-md bg-surface px-2 py-1.5 text-xs text-text-primary shadow-popover"
+            className="z-50 rounded-md border border-border bg-surface px-2 py-1.5 text-caption text-text-primary shadow-popover"
           >
             {content}
           </RT.Content>

@@ -1,10 +1,11 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import { Checkbox, Icon } from "@/components/ui";
+import { Checkbox } from "@/components/ui";
 import { currencyCode, formatAmount, formatDateTime, shortenId } from "@/lib/format";
 import type { SortState } from "@/lib/payments/query";
 import type { Payment } from "@/lib/payments/types";
 import { CopyIdButton } from "./CopyIdButton";
 import { CreatedCell } from "./CreatedCell";
+import { RowActions } from "./RowActions";
 import { PaymentMethodCell } from "./PaymentMethodCell";
 import { SortHeader } from "./SortHeader";
 import { StatusBadge } from "./StatusBadge";
@@ -42,7 +43,7 @@ export function buildColumns({ sort, onSortChange, now }: ColumnCtx): ColumnDef<
       cell: ({ row: { original: p } }) => (
         <span className="flex items-baseline justify-end gap-1">
           <span className="font-semibold tabular-nums">{formatAmount(p.amount, p.currency)}</span>
-          <span className="text-text-muted">{currencyCode(p.currency)}</span>
+          <span className="text-text-secondary">{currencyCode(p.currency)}</span>
         </span>
       ),
     },
@@ -55,7 +56,7 @@ export function buildColumns({ sort, onSortChange, now }: ColumnCtx): ColumnDef<
       id: "paymentId",
       header: "Payment ID",
       cell: ({ row }) => (
-        <span className="inline-flex items-center gap-1">
+        <span className="inline-flex h-[26px] items-center gap-1 rounded-md border border-border-row bg-bg-hover py-0.5 pr-1 pl-1.5 font-mono text-caption text-text-secondary">
           <span className="tabular-nums">{shortenId(row.original.id)}</span>
           <CopyIdButton id={row.original.id} />
         </span>
@@ -94,15 +95,7 @@ export function buildColumns({ sort, onSortChange, now }: ColumnCtx): ColumnDef<
     {
       id: "actions",
       header: () => <span className="sr-only">Actions</span>,
-      cell: () => (
-        <button
-          type="button"
-          aria-label="More options"
-          className="inline-flex size-(--size-control-sm) cursor-pointer items-center justify-center rounded-sm text-text-muted outline-transparent hover:bg-bg-hover focus-visible:ring-2 focus-visible:ring-brand-ring"
-        >
-          <Icon name="more" size={16} />
-        </button>
-      ),
+      cell: () => <RowActions />,
     },
   ];
 }

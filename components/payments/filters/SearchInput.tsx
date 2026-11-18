@@ -24,8 +24,8 @@ export function SearchInput({ value, onChange }: { value: string; onChange: (v: 
 
   return (
     <div className="relative">
-      <span className="pointer-events-none absolute top-1/2 left-2 -translate-y-1/2 text-text-muted">
-        <Icon name="search" size={14} />
+      <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-text-primary">
+        <Icon name="search" size={12} />
       </span>
       <input
         type="text"
@@ -41,7 +41,7 @@ export function SearchInput({ value, onChange }: { value: string; onChange: (v: 
             onChange(v);
           }, 200);
         }}
-        className="h-(--size-control-md) w-full rounded-md border border-border bg-surface pr-2 pl-7 text-body text-text-primary outline-transparent placeholder:text-text-muted focus-visible:ring-2 focus-visible:ring-brand-ring"
+        className="h-9 w-full rounded-lg bg-bg-hover pr-3 pl-8 text-body text-text-primary placeholder:text-text-secondary"
       />
     </div>
   );

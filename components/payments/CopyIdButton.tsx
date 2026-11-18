@@ -37,7 +37,7 @@ export function CopyIdButton({ id }: { id: string }) {
           type="button"
           aria-label="Copy payment ID"
           onClick={copy}
-          className="inline-flex size-(--size-control-sm) cursor-pointer items-center justify-center rounded-sm text-text-muted opacity-0 outline-transparent hover:bg-bg-hover focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-brand-ring group-hover:opacity-100 group-focus-within:opacity-100"
+          className="inline-flex size-4 cursor-pointer items-center justify-center rounded-sm text-text-secondary opacity-0 hover:bg-border-row focus-visible:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100"
         >
           <Icon name="copy" size={12} />
         </button>

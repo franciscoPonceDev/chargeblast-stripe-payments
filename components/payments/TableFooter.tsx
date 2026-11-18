@@ -19,12 +19,12 @@ export function TableFooter({
   const start = page * pageSize + 1;
   const end = page * pageSize + rows.length;
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 py-3 text-body text-text-secondary">
+    <div className="mt-2 flex flex-wrap items-center justify-between gap-3 border-t border-border-row py-2 text-caption leading-4 text-text-secondary">
       <span aria-live="polite">{total === 0 ? "Viewing 0 results" : `Viewing ${fmt(start)}–${fmt(end)} of ${fmt(total)} results`}</span>
       <div className="flex items-center gap-2">
         <PageSizeSelect value={pageSize} onChange={onPageSizeChange} />
-        <Button size="sm" disabled={page <= 0} onClick={() => onPageChange(page - 1)}>Previous</Button>
-        <Button size="sm" disabled={page >= pageCount - 1} onClick={() => onPageChange(page + 1)}>Next</Button>
+        <Button disabled={page <= 0} onClick={() => onPageChange(page - 1)}>Previous</Button>
+        <Button disabled={page >= pageCount - 1} onClick={() => onPageChange(page + 1)}>Next</Button>
       </div>
     </div>
   );

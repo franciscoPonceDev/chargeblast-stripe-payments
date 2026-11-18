@@ -3,7 +3,7 @@ import type { ReactNode, SVGProps } from "react";
 export type IconName =
   | "plus" | "chart" | "export" | "gear" | "x" | "check" | "chevron-down"
   | "chevron-up" | "copy" | "more" | "search" | "circle-plus" | "sort"
-  | "calendar" | "clock" | "refund" | "ban" | "bank" | "info";
+  | "calendar" | "clock" | "refund" | "ban" | "bank" | "info" | "mail";
 
 const PATHS: Record<IconName, ReactNode> = {
   plus: <path d="M8 3v10M3 8h10" />,
@@ -55,6 +55,12 @@ const PATHS: Record<IconName, ReactNode> = {
     <>
       <circle cx="8" cy="8" r="6" />
       <path d="M8 4.5V8l2.5 1.5" />
+    </>
+  ),
+  mail: (
+    <>
+      <rect x="2" y="3.5" width="12" height="9" rx="1.5" />
+      <path d="M2.5 5l5.5 4 5.5-4" />
     </>
   ),
   refund: <path d="M6 3L3 6l3 3M3 6h6.5a3.5 3.5 0 0 1 0 7H7" />,

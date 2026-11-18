@@ -9,6 +9,22 @@ A Next.js + TypeScript rebuild of the Stripe Dashboard "Transactions → Payment
 - **Live:** <https://chargeblast-stripe-payments.vercel.app/payments>
 - **Repo:** <https://github.com/franciscoPonceDev/chargeblast-stripe-payments>
 
+## Highlights
+
+- **Measured, not eyeballed.** Spacing, colors, type and shadows come from a computed-style capture of the live Stripe dashboard, stored as design tokens. [See the evidence](#fidelity-method).
+- **Shared links render correctly before any JavaScript.** The server renders the exact filtered page; after that, filtering, sorting and paging run in the browser with zero server round trips.
+- **Fast.** Desktop Lighthouse 99-100, layout shift ~0, desktop LCP under 0.3 s. 142 KB of HTML cut by drawing card logos once per page.
+- **Growth-ready analytics.** Typed events into GTM with Consent Mode v2, optional server-side tagging and PostHog, Web Vitals, and a flicker-free A/B test. No personal data in any event.
+- **Tested end to end.** 330 unit tests, 24 Playwright tests with axe accessibility scans, visual regression, and CI that fails on a Lighthouse budget.
+
+## Review this in 5 minutes
+
+1. **A shared link with filters:** [failed + refunded, last 30 days, largest first](https://chargeblast-stripe-payments.vercel.app/payments?status=failed,refunded&date=30d&sort=amount.desc). Reload it: the first paint is already correct.
+2. **Play with it:** type in search, change filters and sorting, switch to 100 rows, export CSV, hover a date.
+3. **A details page:** click any row, or open [this payment](https://chargeblast-stripe-payments.vercel.app/payments/pi_mkRkv0n70L5jxRt7Zw4lVYHB).
+4. **The quality gates:** the latest [CI run](https://github.com/franciscoPonceDev/chargeblast-stripe-payments/actions/workflows/ci.yml) (lint, types, unit, build, e2e, Lighthouse).
+5. **The thinking:** [Judgment calls](#judgment-calls) and [Growth engineering](#growth-engineering).
+
 ## Screenshots
 
 These are this app's own committed visual-regression baselines (1440x900, Windows Chrome).
@@ -20,6 +36,25 @@ These are this app's own committed visual-regression baselines (1440x900, Window
 ![Status filter popover](docs/screenshots/status-filter-popover.png)
 
 The visual reference was the screenshots in the assessment brief, plus measurements of the live Stripe dashboard (see [Fidelity method](#fidelity-method)). No Stripe screenshots or assets are in this repo.
+
+## Growth engineering
+
+The role this was built for is growth engineering, so the app ships with the tracking layer a marketing team would actually use. Full event dictionary and setup steps: [`docs/analytics.md`](docs/analytics.md).
+
+**How a marketer would use it**
+
+- **Which filters do people actually use?** `filter_applied` (filter name + how many values) and `search_performed` (query length only) show where users look for payments, which tells product what to surface by default.
+- **Where do they get stuck?** `page_changed`, `sort_changed` and `export_csv` (row count) reveal people paging deep or exporting to work in a spreadsheet instead of in the product.
+- **Does the new banner copy convert?** The `banner_cta` experiment logs exposure (`experiment_viewed`, once per session) and conversion (`banner_cta_clicked`) per variant. Conversion rate = clicks / exposures per variant, read in GA4 or PostHog.
+- **Is the page fast for real users?** `web_vitals` sends CLS, INP, LCP, FCP and TTFB from real sessions, not just lab scores.
+
+**How it is built**
+
+- **Typed event layer.** `track(name, params)` in [`lib/analytics/events.ts`](lib/analytics/events.ts) pushes to `window.dataLayer`. 13 typed events; params are counts and enums only, never search text, emails, names or payment ids.
+- **GTM + Consent Mode v2.** [`Gtm.tsx`](components/analytics/Gtm.tsx) sets all consent signals to `denied` before the container loads. An "Analytics cookies" switch in the account menu sends `consent update`. Nothing loads unless `NEXT_PUBLIC_GTM_ID` is set.
+- **Server-side tagging.** `NEXT_PUBLIC_GTM_SERVER_URL` points the loader at your own tagging server (first-party, ad-blocker resilient).
+- **PostHog adapter.** [`posthog.ts`](lib/analytics/posthog.ts): loaded on demand, opted out by default, no autocapture or session recording, enabled by the same consent switch.
+- **Flicker-free A/B test.** [`middleware.ts`](middleware.ts) assigns a sticky 50/50 `ab_banner` cookie before the page renders, so the server already shows the right copy ("Get started" vs "Explore Sigma"). No client-side swap, no flash.
 
 ## Requirements checklist
 
@@ -120,7 +155,28 @@ Request /payments?status=failed&sort=amount.desc
 4. **Assets are open-license**: Lucide icons (ISC), card brand marks (Apache-2.0/MIT), Apple Pay and Google Pay glyphs from simple-icons (CC0). No Stripe artwork was copied. See [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 5. **Brand color** is `#635bff`, as rendered in the brief. The live dashboard has since moved to `#533afd`.
 
-## Decisions and trade-offs
+A sample of measured values and where they live in this app:
+
+| Element | Measured on live Stripe | This app |
+| --- | --- | --- |
+| Table row | 44px high, 1px `#ecf1f6` divider | 44px (`h-11`), `--color-border-row: #ecf1f6` |
+| Body text | 14px / 20px, `#1a2c44` | `--color-text-primary: #1a2c44` |
+| Succeeded badge | 12px / 16px, padding 1px 6px, radius 4, `#eafcdd` / `#a8f170` / `#217005` | same values in [`StatusBadge.tsx`](components/payments/StatusBadge.tsx) and tokens |
+| Buttons | 28px high, radius 6, ring `0 0 0 1px #d4dee9` | `--shadow-ring: 0 0 0 1px #d4dee9` |
+| Focus ring | `0 0 0 4px rgba(1,150,237,.36)` | `--shadow-focus`, identical |
+
+## Judgment calls
+
+The decisions that mattered most, and why.
+
+- **Brief over live Stripe when they disagree.** Stripe has redesigned this page since the brief was written. Reviewers compare against the brief, so its layout and labels win, while the precise values (spacing, colors, shadows) come from live measurements.
+- **Search engines are blocked on purpose.** A public page that looks like the Stripe dashboard can get flagged by phishing classifiers, which can get the domain blocked in browsers. Full SEO is built (metadata, OG images, sitemap, JSON-LD) and turns on with one env var.
+- **Amounts sort by real value, not face value.** Without conversion, ¥49,800 (about $330) sorts above $4,999. Sorting uses a fixed USD exchange table; the amount filter stays in each payment's own currency, which is what a user typing "over 100" expects.
+- **Server-first, then client-only.** The server renders the exact page a shared link asks for, so it is right before any JavaScript runs. After that, the full dataset loads once and every interaction is local, with no request per keystroke.
+- **Clean, privacy-safe mock data.** A final review found that a real company's email domain had slipped into the generated data. It was replaced with reserved test domains, with every payment otherwise unchanged, and removed from the git history too.
+- **The Payment ID column sits last.** The brief requires it but the reference screenshot does not show it, so placing it last keeps every other column exactly where the reference has it.
+
+## All decisions and trade-offs
 
 Product and fidelity:
 
@@ -154,17 +210,6 @@ Engineering:
 - **`htmlLimitedBots: /.*/`** keeps metadata in `<head>` for every user agent; revisit if metadata gains I/O.
 - **Page-level integration tests have a 30s timeout** (heavy jsdom renders); real-browser e2e covers the same flows.
 - Process rulings: Stripe REST via `fetch` and no `stripe` dependency for the data-seeding spike; TanStack Table pinned to v8 (the plan and interfaces assume the v8 API); focus ring adopts Stripe's measured `0 0 0 4px rgba(1,150,237,.36)`.
-
-## Growth engineering
-
-Full details, event dictionary and setup steps: [`docs/analytics.md`](docs/analytics.md).
-
-- **Typed event layer.** `track(name, params)` in [`lib/analytics/events.ts`](lib/analytics/events.ts) pushes to `window.dataLayer`. 13 typed events (filters, search, sort, paging, export, copy, banner, experiment, web vitals). Params never contain raw search text, emails, names or payment ids.
-- **GTM + Consent Mode v2.** [`Gtm.tsx`](components/analytics/Gtm.tsx) sets all four consent signals to `denied` before the container loads. An "Analytics cookies" switch in the account menu sends `consent update` and persists the choice. Nothing loads unless `NEXT_PUBLIC_GTM_ID` is set.
-- **Server-side tagging.** `NEXT_PUBLIC_GTM_SERVER_URL` points the loader and `server_container_url` at your own endpoint. The app does not provision the server container.
-- **PostHog adapter.** [`posthog.ts`](lib/analytics/posthog.ts): dynamic import, opted out by default, no autocapture, no session recording, in-memory persistence, enabled by the same consent switch.
-- **Web Vitals.** CLS, INP, LCP, FCP and TTFB are reported as `web_vitals` events, loaded after hydration.
-- **A/B test `banner_cta`.** [`middleware.ts`](middleware.ts) assigns a sticky 50/50 `ab_banner` cookie, forwarded to the same request so the server render shows the right copy without flicker ("Get started" vs "Explore Sigma"). `experiment_viewed` fires once per session as the exposure; `banner_cta_clicked` is the conversion.
 
 ## Performance
 
@@ -222,14 +267,21 @@ CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs on pushes and P
 
 ## AI-assisted workflow
 
-The project was built with Claude Code in a spec-driven loop: a written spec, then an implementation plan split into tasks, then subagent implementation. Sonnet subagents implemented tasks, and an Opus orchestrator dispatched them, reviewed each task (by a reviewer subagent, or directly for tiny diffs), and ran fix rounds before moving on. A progress ledger recorded each ruling and its cost. The human made the calls on the fidelity source (brief plus live measurements), icon licensing (open-license only), and keeping indexing off by default.
+I used AI agents (Claude Code) the way I would run a small team:
 
-## Not done and next steps
+- **I set the direction.** I shaped and approved the spec and the plan, chose the fidelity source (brief layout plus live measurements), required open-license icons only, and decided to keep indexing off.
+- **I set the quality bar.** Every task had to pass tests and an independent code review before the next one started, and the whole branch got a final senior-level review before merging. Review findings were fixed, not waived.
+- **Agents did the typing.** Implementation agents wrote code against that plan; a progress ledger recorded every ruling so decisions stayed consistent.
 
-- **Column resize and reorder** were not built. Edit columns covers visibility and wrapping only. Reorder would be a TanStack `columnOrder` plus drag handles; resize needs `columnSizing` and a layout pass against the fixed-width reference.
-- **Mobile Performance 95.** Ideas: reduce hydration cost (smaller shared runtime, islands for filters), stream the table body, or render the first page with no client JS until interaction.
-- **Visual regression on Linux** so it can run in CI (needs Linux baselines).
-- **Timezone selector** instead of fixed UTC; a real "now" with data generated relative to build time.
-- **Pagination on the server** for datasets too large to ship whole.
-- **Touch-friendly copy button** (currently hover/focus only).
-- **Nonce-based CSP** if the details route stops being prerendered.
+The result is more ground covered in the time available, with every change still reviewed and tested.
+
+## Roadmap
+
+What I would do next, in order:
+
+1. **Column resize and reorder** (the one nice-to-have not built): TanStack `columnOrder` with drag handles, `columnSizing` with keyboard support.
+2. **Mobile performance to 95+** (currently 78): cut hydration cost by making filters separate islands and rendering the first page with no client JS until interaction.
+3. **Visual regression in CI** by adding Linux baselines next to the Windows ones.
+4. **Server-side pagination** so the design scales past datasets that fit in the browser.
+5. **Real time handling:** a timezone selector instead of fixed UTC, and data relative to today.
+6. **Touch-friendly row actions** (copy is hover/focus only today) and a **nonce-based CSP** if the details pages stop being prerendered.

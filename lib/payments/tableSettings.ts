@@ -1,21 +1,8 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import { COLUMN_OPTIONS, SETTINGS_STYLE_ID, TABLE_SETTINGS_KEY } from "./tableSettingsConfig";
 
-export const TABLE_SETTINGS_KEY = "payments.tableSettings.v1";
-
-/** Hideable data columns in table order. Select and row actions are structural and not listed. */
-export const COLUMN_OPTIONS: readonly { id: string; label: string; locked?: boolean }[] = [
-  { id: "amount", label: "Amount", locked: true },
-  { id: "currency", label: "Currency" },
-  { id: "status", label: "Status" },
-  { id: "method", label: "Payment method" },
-  { id: "description", label: "Description" },
-  { id: "customer", label: "Customer" },
-  { id: "created", label: "Date" },
-  { id: "refundedAt", label: "Refunded date" },
-  { id: "declineReason", label: "Decline reason" },
-  { id: "paymentId", label: "Payment ID" },
-];
+export { COLUMN_OPTIONS, TABLE_SETTINGS_KEY };
 
 export interface TableSettings {
   hidden: string[];
@@ -64,6 +51,11 @@ export function useTableSettings() {
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);
   }, []);
+
+  // The pre-paint <style> (see settingsScript) has done its job once React has rendered the same settings.
+  useEffect(() => {
+    if (loaded) document.getElementById(SETTINGS_STYLE_ID)?.remove();
+  }, [loaded, settings]);
 
   useEffect(() => {
     if (!loaded) return;

@@ -179,7 +179,7 @@ export function PaymentsView({ initialRows, initialTotal, initialQuery, counts, 
       </div>
       <div className="mt-(--space-section) flex flex-wrap items-center justify-between gap-2">
         <FilterBar query={query} onChange={update} />
-        <div className="flex items-center gap-2">
+        <div className="relative flex items-center gap-2">
           <ExportButton all={all} status={status} query={query} now={now} />
           <EditColumns
             settings={settings}

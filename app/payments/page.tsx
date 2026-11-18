@@ -8,6 +8,7 @@ import { MOCK_NOW } from "@/lib/payments/generate";
 import { applyQuery, tabCounts } from "@/lib/payments/query";
 import { BANNER_COOKIE, parseVariant } from "@/lib/experiments";
 import { parseQuery } from "@/lib/payments/url";
+import { settingsScript } from "@/lib/payments/tableSettingsConfig";
 
 export const metadata: Metadata = {
   title: "Transactions",
@@ -29,6 +30,8 @@ export default async function PaymentsPage({
   return (
     <>
       <BrandSprite />
+      {/* Trade-off: tiny inline script applies saved column settings before first paint (no layout shift); needs CSP 'unsafe-inline'. */}
+      <script dangerouslySetInnerHTML={{ __html: settingsScript() }} />
       <PaymentsView
         initialRows={rows}
         initialTotal={total}

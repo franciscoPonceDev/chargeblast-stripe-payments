@@ -78,7 +78,7 @@ function PaymentsTableImpl({
   // Trade-off: table scrolls horizontally beside the sidebar, as in the reference, rather than wrapping columns.
   return (
     <div className="relative overflow-x-auto">
-      <table className="w-full border-collapse whitespace-nowrap text-table text-text-primary">
+      <table data-payments-table className="w-full border-collapse whitespace-nowrap text-table text-text-primary">
         <caption className="sr-only">Payments</caption>
         <thead>
           {table.getHeaderGroups().map((hg) => (
@@ -86,6 +86,7 @@ function PaymentsTableImpl({
               {hg.headers.map((h) => (
                 <th
                   key={h.id}
+                  data-col={h.column.id}
                   scope="col"
                   aria-sort={ariaSort(h.column.id)}
                   className={`${padFor(h.column.id)}${h.column.id === "actions" ? " sticky right-0 bg-surface" : ""} py-2.5 text-caption leading-5 font-semibold text-text-secondary shadow-[inset_0_-1px_0_var(--color-border-row)] ${h.column.id === "amount" ? "text-right" : "text-left"}`}
@@ -120,6 +121,7 @@ function PaymentsTableImpl({
                 {row.getVisibleCells().map((cell) => (
                   <td
                     key={cell.id}
+                    data-col={cell.column.id}
                     className={`${padFor(cell.column.id)}${cell.column.id === "actions" ? " sticky right-0 bg-surface group-focus-within:bg-bg-hover group-hover:bg-bg-hover" : ""} py-0${wrap ? " whitespace-normal [&_.truncate]:whitespace-normal" : ""} shadow-[inset_0_-1px_0_var(--color-border-row)] ${cell.column.id === "amount" ? "text-right" : "text-left"}`}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

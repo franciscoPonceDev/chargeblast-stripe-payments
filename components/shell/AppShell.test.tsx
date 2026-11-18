@@ -22,7 +22,7 @@ describe("AppShell", () => {
   it("renders the sections and bottom link in order", () => {
     setup();
     const nav = screen.getByRole("navigation", { name: "Main" });
-    expect(within(nav).getAllByRole("heading").map((h) => h.textContent)).toEqual(["Shortcuts", "Products"]);
+    expect(within(nav).getAllByRole("group").map((g) => g.getAttribute("aria-labelledby") && document.getElementById(g.getAttribute("aria-labelledby")!)?.textContent)).toEqual(["Shortcuts", "Products"]);
     for (const n of ["Home", "Balances", "Customers", "Product catalog", "Sigma", "Radar", "Developers"]) {
       expect(screen.getByRole("button", { name: n })).toBeInTheDocument();
     }
@@ -65,5 +65,26 @@ describe("AppShell", () => {
     await userEvent.keyboard("{Escape}");
     expect(toggle).toHaveAttribute("aria-expanded", "false");
     expect(toggle).toHaveFocus();
+  });
+
+  it("moves focus into the drawer on open and wraps Tab", async () => {
+    setup();
+    await userEvent.click(screen.getByRole("button", { name: "Toggle navigation menu" }));
+    const sidebar = screen.getByLabelText("Sidebar");
+    expect(sidebar).toContainElement(document.activeElement as HTMLElement);
+    expect(document.body.style.overflow).toBe("hidden");
+    await userEvent.tab({ shift: true });
+    expect(screen.getByRole("button", { name: "Developers" })).toHaveFocus();
+    await userEvent.tab();
+    expect(sidebar).toContainElement(document.activeElement as HTMLElement);
+  });
+
+  it("closes when the scrim is clicked and restores scroll", async () => {
+    setup();
+    const toggle = screen.getByRole("button", { name: "Toggle navigation menu" });
+    await userEvent.click(toggle);
+    await userEvent.click(screen.getByTestId("scrim"));
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(document.body.style.overflow).toBe("");
   });
 });

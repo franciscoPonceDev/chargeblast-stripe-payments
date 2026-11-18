@@ -22,9 +22,10 @@ export interface TopBarProps {
   drawerId: string;
   onToggleDrawer: () => void;
   toggleRef: Ref<HTMLButtonElement>;
+  inert?: boolean;
 }
 
-export function TopBar({ search, drawerOpen, drawerId, onToggleDrawer, toggleRef }: TopBarProps) {
+export function TopBar({ search, drawerOpen, drawerId, onToggleDrawer, toggleRef, inert }: TopBarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   return (
     <header className="flex h-(--size-topbar) items-center gap-3 px-(--space-page-x)">
@@ -39,8 +40,8 @@ export function TopBar({ search, drawerOpen, drawerId, onToggleDrawer, toggleRef
       >
         <Icon name="menu" size={16} />
       </button>
-      <div className="min-w-0 flex-1 basis-0 lg:max-w-(--size-search-max)">{search}</div>
-      <div className="ml-auto flex shrink-0 items-center gap-2">
+      <div inert={inert} className="min-w-0 flex-1 basis-0 lg:max-w-(--size-search-max)">{search}</div>
+      <div inert={inert} className="ml-auto flex shrink-0 items-center gap-2">
         <p className="hidden text-caption text-text-secondary xl:block">
           Test mode has moved.{" "}
           <button type="button" className="cursor-pointer underline hover:text-text-primary focus-visible:shadow-focus">
@@ -81,6 +82,14 @@ export function TopBar({ search, drawerOpen, drawerId, onToggleDrawer, toggleRef
           <div className="px-2 py-1">
             <p className="font-semibold text-text-primary">Acme Inc.</p>
             <p className="text-caption text-text-secondary">demo@acme.test</p>
+          </div>
+          <div className="sm:hidden">
+            <hr className="my-2 border-border-row" />
+            {["Apps", "Help", "Notifications"].map((l) => (
+              <button key={l} type="button" className={MENU_ITEM}>
+                {l}
+              </button>
+            ))}
           </div>
           <hr className="my-2 border-border-row" />
           {["Profile", "Settings", "Sign out"].map((l) => (

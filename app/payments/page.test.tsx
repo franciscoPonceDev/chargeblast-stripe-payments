@@ -1,12 +1,20 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, it, expect } from "vitest";
+import { afterEach, beforeEach, describe, it, expect, vi } from "vitest";
 import data from "@/data/payments.json";
 import { tabCounts } from "@/lib/payments/query";
 import type { Payment } from "@/lib/payments/types";
 import PaymentsPage from "./page";
 
 describe("PaymentsPage", () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+  const user = () => userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+
   it("renders the Transactions heading and section tabs", () => {
     render(<PaymentsPage />);
     expect(screen.getByRole("heading", { name: "Transactions" })).toBeInTheDocument();
@@ -33,10 +41,13 @@ describe("PaymentsPage", () => {
   });
   it("shows empty state for no matches", async () => {
     render(<PaymentsPage />);
-    await userEvent.type(screen.getAllByLabelText("Search")[0], "zzzznomatch");
-    expect(await screen.findByText("Viewing 0 results", {}, { timeout: 5000 })).toBeInTheDocument();
+    await user().type(screen.getAllByLabelText("Search")[0], "zzzznomatch");
+    act(() => {
+      vi.advanceTimersByTime(250);
+    });
+    expect(await screen.findByText("Viewing 0 results")).toBeInTheDocument();
     expect(screen.getByText("No results found")).toBeInTheDocument();
-  }, 15000);
+  });
   it("dismisses the banner", async () => {
     render(<PaymentsPage />);
     await userEvent.click(screen.getByRole("button", { name: "Dismiss" }));
@@ -59,9 +70,12 @@ describe("PaymentsPage", () => {
   it("top-bar search resets to page 1", async () => {
     render(<PaymentsPage />);
     await userEvent.click(screen.getByRole("button", { name: "Next" }));
-    await userEvent.type(screen.getAllByLabelText("Search")[0], "a");
-    expect(await screen.findByText(/^Viewing 1–\d+ of \d+ results$/, {}, { timeout: 5000 })).toBeInTheDocument();
-  }, 15000);
+    await user().type(screen.getAllByLabelText("Search")[0], "a");
+    act(() => {
+      vi.advanceTimersByTime(250);
+    });
+    expect(await screen.findByText(/^Viewing 1–\d+ of \d+ results$/)).toBeInTheDocument();
+  });
   it("moves focus to the selected status tab after dismissing the banner", async () => {
     render(<PaymentsPage />);
     await userEvent.click(screen.getByRole("button", { name: "Dismiss" }));

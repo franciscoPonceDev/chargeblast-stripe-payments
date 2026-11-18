@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -21,7 +21,7 @@ function padFor(id: string) {
 
 export const EMPTY_MESSAGE = "No results found";
 
-export function PaymentsTable({
+function PaymentsTableImpl({
   rows,
   sort,
   onSortChange,
@@ -108,3 +108,5 @@ export function PaymentsTable({
     </div>
   );
 }
+
+export const PaymentsTable = memo(PaymentsTableImpl);

@@ -114,26 +114,26 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
             ),
           )}
         </ul>
-        <section aria-labelledby="nav-shortcuts">
-          <h2 id="nav-shortcuts" className={LABEL}>
+        <div role="group" aria-labelledby="nav-shortcuts">
+          <p id="nav-shortcuts" className={LABEL}>
             Shortcuts
-          </h2>
+          </p>
           <ul>
             {SHORTCUTS.map((i) => (
               <InertItem key={i.label} {...i} />
             ))}
           </ul>
-        </section>
-        <section aria-labelledby="nav-products">
-          <h2 id="nav-products" className={LABEL}>
+        </div>
+        <div role="group" aria-labelledby="nav-products">
+          <p id="nav-products" className={LABEL}>
             Products
-          </h2>
+          </p>
           <ul>
             {PRODUCTS.map((p) => (
               <Disclosure key={p.label} {...p} />
             ))}
           </ul>
-        </section>
+        </div>
       </nav>
       <div className="shrink-0 px-(--space-sidebar-x) pb-5">
         <button type="button" className={ITEM}>

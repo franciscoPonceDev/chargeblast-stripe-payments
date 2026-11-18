@@ -39,3 +39,5 @@ export async function amountsOnPage(page: Page): Promise<number[]> {
 
 /** Filter pill trigger; the sortable table headers share names such as "Status" and "Amount". */
 export const pill = (page: Page, name: string): Locator => page.locator('button[aria-haspopup="dialog"]').filter({ hasText: name });
+
+export const MOCK_DATE = new Date(MOCK_NOW).toISOString().slice(0, 10);

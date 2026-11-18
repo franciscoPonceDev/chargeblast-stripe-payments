@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
-import { amountsOnPage, bodyRows, DAY_MS, footer, loadPayments, major, MOCK_NOW, openPayments, pill } from "./helpers";
+import { sortPayments, type SortKey } from "../lib/payments/query";
+import type { Payment } from "../lib/payments/types";
+import { amountsOnPage, type ApiPayment, bodyRows, DAY_MS, footer, loadPayments, major, MOCK_DATE, MOCK_NOW, openPayments, pill } from "./helpers";
 
 test.describe("filters", () => {
   test("status filter updates rows, count and URL", async ({ page, request }) => {
@@ -49,48 +51,68 @@ test.describe("filters", () => {
     await expect(pill(page, "Date and time")).toContainText("Last 7 days");
   });
 
-  test("search by card last 4 shows only matching rows", async ({ page, request }) => {
-    const data = await loadPayments(request);
-    const last4 = data[0].method.last4;
-    const hits = data.filter(
-      (p) =>
-        p.method.last4.includes(last4) ||
-        p.id.toLowerCase().includes(last4) ||
-        p.customerEmail.toLowerCase().includes(last4) ||
-        p.customerName.toLowerCase().includes(last4),
-    );
-    await openPayments(page);
-    await page.getByRole("textbox", { name: "Search" }).fill(last4);
-    await expect(page).toHaveURL(new RegExp(`q=${last4}`));
-    await expect(footer(page)).toContainText(`of ${hits.length} results`);
-    await expect(bodyRows(page)).toHaveCount(Math.min(hits.length, 25));
-    expect(await bodyRows(page).filter({ hasText: `•••• ${last4}` }).count()).toBeGreaterThan(0);
-  });
+  const searchCases: [string, (p: ApiPayment) => string][] = [
+    ["card last 4", (p) => p.method.last4],
+    ["email", (p) => p.customerEmail],
+    ["payment id", (p) => p.id],
+  ];
+  for (const [label, pick] of searchCases) {
+    test(`search by ${label} shows only matching rows`, async ({ page, request }) => {
+      const data = await loadPayments(request);
+      const term = pick(data[0]);
+      const t = term.toLowerCase();
+      const hits = data.filter(
+        (p) =>
+          p.id.toLowerCase().includes(t) ||
+          p.customerEmail.toLowerCase().includes(t) ||
+          p.customerName.toLowerCase().includes(t) ||
+          (/^\d{1,4}$/.test(t) && p.method.last4.includes(t)),
+      );
+      expect(hits.length).toBeGreaterThan(0);
+      await openPayments(page);
+      await page.getByRole("textbox", { name: "Search" }).fill(term);
+      await expect(page).toHaveURL((u) => u.searchParams.get("q") === term);
+      await expect(footer(page)).toContainText(`of ${hits.length} results`);
+      await expect(bodyRows(page)).toHaveCount(Math.min(hits.length, 25));
+      if (label === "card last 4") expect(await bodyRows(page).filter({ hasText: `\u2022\u2022\u2022\u2022 ${term}` }).count()).toBeGreaterThan(0);
+      if (label === "email") await expect(bodyRows(page).first().locator("td[data-col='customer']")).toContainText(term);
+      if (label === "payment id") await expect(bodyRows(page)).toHaveCount(hits.length);
+    });
+  }
 });
 
 test.describe("sort and paging", () => {
-  test("sort by amount descending then ascending", async ({ page }) => {
-    await openPayments(page);
-    const header = page.getByRole("table").getByRole("button", { name: "Amount" });
-    await header.click();
-    await expect(page).toHaveURL(/sort=amount\.desc/);
-    const desc = await amountsOnPage(page);
-    expect(desc).toEqual([...desc].sort((a, b) => b - a));
-    await header.click();
-    await expect(page).toHaveURL(/sort=amount\.asc/);
-    await expect(page.getByRole("columnheader", { name: "Amount" })).toHaveAttribute("aria-sort", "ascending");
-    const asc = await amountsOnPage(page);
-    expect(asc).toEqual([...asc].sort((a, b) => a - b));
-    expect(asc[0]).toBeLessThanOrEqual(desc[desc.length - 1]);
-  });
+  const sortCases: { key: SortKey }[] = [
+    { key: "created" },
+    { key: "amount" },
+    { key: "status" },
+  ];
+  for (const { key } of sortCases) {
+    test(`sort by ${key} matches app semantics asc and desc`, async ({ page, request }) => {
+      const data = await loadPayments(request);
+      for (const dir of ["asc", "desc"] as const) {
+        await page.goto(`/payments?sort=${key}.${dir}`);
+        await expect(page.getByRole("button", { name: "Export" })).not.toHaveAttribute("aria-disabled", "true");
+        await expect(page.locator("th[data-col='" + key + "']")).toHaveAttribute("aria-sort", dir === "asc" ? "ascending" : "descending");
+        const expected = sortPayments(data as unknown as Payment[], [{ id: key, desc: dir === "desc" }]).slice(0, 25);
+        await expect(bodyRows(page)).toHaveCount(25);
+        const emails = await bodyRows(page).locator("td[data-col='customer']").allTextContents();
+        expect(emails.map((e) => e.trim())).toEqual(expected.map((p) => p.customerEmail));
+        expect(await amountsOnPage(page)).toEqual(expected.map(major));
+      }
+    });
+  }
 
-  test("page size 50 shows 50 rows", async ({ page }) => {
-    await openPayments(page);
-    await page.getByLabel("Rows per page").selectOption("50");
-    await expect(bodyRows(page)).toHaveCount(50);
-    await expect(footer(page)).toHaveText("Viewing 1–50 of 600 results");
-    await expect(page).toHaveURL(/size=50/);
-  });
+  for (const size of [25, 50, 100]) {
+    test(`page size ${size} shows ${size} rows`, async ({ page, request }) => {
+      const total = (await loadPayments(request)).length;
+      await openPayments(page);
+      await page.getByLabel("Rows per page").selectOption(String(size));
+      await expect(bodyRows(page)).toHaveCount(size);
+      await expect(footer(page)).toHaveText(`Viewing 1\u2013${size} of ${total} results`);
+      if (size !== 25) await expect(page).toHaveURL(new RegExp(`size=${size}`));
+    });
+  }
 });
 
 test.describe("row interactions", () => {
@@ -129,7 +151,7 @@ test("CSV export downloads the filtered rows", async ({ page, request }) => {
   const expected = data.filter((p) => p.status === "refunded").length;
   await openPayments(page, "?status=refunded");
   const [download] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Export" }).click()]);
-  expect(download.suggestedFilename()).toBe("payments-2026-11-17.csv");
+  expect(download.suggestedFilename()).toBe(`payments-${MOCK_DATE}.csv`);
   const lines = readFileSync(await download.path(), "utf8").replace(/^﻿/, "").trim().split("\r\n");
   expect(lines[0]).toBe("id,created,amount,currency,status,payment_method,last4,description,customer_name,customer_email,refunded_at,decline_reason");
   expect(lines.length - 1).toBe(expected);

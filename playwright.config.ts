@@ -22,7 +22,7 @@ export default defineConfig({
   webServer: process.env.E2E_BASE_URL
     ? undefined
     : {
-        command: `npm run build && npm run start -- -p ${PORT}`,
+        command: ci ? `npm run start -- -p ${PORT}` : `npm run build && npm run start -- -p ${PORT}`,
         url: `http://localhost:${PORT}/payments`,
         reuseExistingServer: !ci,
         timeout: 300_000,

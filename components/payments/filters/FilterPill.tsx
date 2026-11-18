@@ -65,7 +65,7 @@ export function FilterPill({ label, summary, onClear, title, children }: FilterP
             {set && (
               <>
                 <span aria-hidden="true" className="h-3 w-px shrink-0 bg-border" />
-                <span className="max-w-[16rem] truncate text-brand">{summary}</span>
+                <span className="max-w-(--size-pill-summary) truncate text-brand">{summary}</span>
               </>
             )}
           </button>

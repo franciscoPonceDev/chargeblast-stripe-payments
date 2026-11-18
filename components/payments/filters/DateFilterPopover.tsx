@@ -65,7 +65,7 @@ function DateForm({ value, onApply }: { value: DateFilter; onApply: (d: DateFilt
             name="date-preset"
             checked={preset === p.id}
             onChange={() => setPreset(p.id)}
-            className="accent-brand"
+            className="rounded-full accent-brand focus-visible:shadow-focus"
           />
           {p.label}
         </label>

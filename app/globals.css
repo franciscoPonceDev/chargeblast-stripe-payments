@@ -53,6 +53,7 @@
   --size-card: 38px;
   --size-chip: 26px;
   --size-popover: 320px;
+  --size-pill-summary: 16rem;
   --size-actions-col: 96px;
 
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif,

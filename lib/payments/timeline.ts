@@ -57,7 +57,7 @@ export function buildTimeline(p: Payment, now: number = Number.POSITIVE_INFINITY
       break;
   }
 
-  if (p.disputed) {
+  if (p.disputed && (p.status === "succeeded" || p.status === "refunded")) {
     const at = Math.max(settled, Math.min(p.created + DISPUTE_DELAY_MS, now));
     events.push({ key: "disputed", label: "Dispute opened", at, tone: "danger" });
   }

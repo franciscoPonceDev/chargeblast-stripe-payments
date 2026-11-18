@@ -226,10 +226,9 @@ describe("PaymentsTable", () => {
 
   it("links the amount to the details page and navigates on row click", async () => {
     setup();
-    const link = screen.getByRole("link", { name: /^View payment pi_1/ });
+    const link = screen.getByRole("link", { name: /^\$12\.34, view payment pi_1/ });
     expect(link).toHaveAttribute("href", `/payments/${rows[0].id}`);
     const push = vi.mocked(useRouter().push);
-    push.mockClear();
     await userEvent.click(screen.getAllByRole("row")[2]);
     expect(push).toHaveBeenCalledWith(`/payments/${rows[1].id}`);
   });
@@ -237,9 +236,29 @@ describe("PaymentsTable", () => {
   it("does not navigate when clicking the checkbox or copy button", async () => {
     setup();
     const push = vi.mocked(useRouter().push);
-    push.mockClear();
     await userEvent.click(screen.getByRole("checkbox", { name: `Select payment ${rows[0].id}` }));
     await userEvent.click(screen.getAllByRole("button", { name: "Copy payment ID" })[0]);
     expect(push).not.toHaveBeenCalled();
+  });
+
+  it("does not navigate when clicking the amount link itself", async () => {
+    setup();
+    const push = vi.mocked(useRouter().push);
+    await userEvent.click(screen.getAllByRole("link", { name: /view payment/ })[0]);
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("does not navigate with a text selection or modifier key", async () => {
+    setup();
+    const push = vi.mocked(useRouter().push);
+    const row = screen.getAllByRole("row")[1];
+    fireEvent.click(row, { ctrlKey: true });
+    expect(push).not.toHaveBeenCalled();
+    const sel = vi.spyOn(window, "getSelection").mockReturnValue({ toString: () => "abc" } as Selection);
+    fireEvent.click(row);
+    expect(push).not.toHaveBeenCalled();
+    sel.mockRestore();
+    fireEvent.click(row);
+    expect(push).toHaveBeenCalledTimes(1);
   });
 });

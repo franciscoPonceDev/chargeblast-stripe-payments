@@ -53,6 +53,9 @@ describe("buildTimeline", () => {
     const ev = buildTimeline({ ...base, disputed: true }, T + 3_600_000);
     expect(ev[2].at).toBe(T + 3_600_000);
   });
+  it("never disputes a payment that did not succeed", () => {
+    expect(labels({ ...base, status: "failed", disputed: true })).not.toContain("Dispute opened");
+  });
   it("events are chronological", () => {
     const ev = buildTimeline({ ...base, status: "refunded", disputed: true, refundedAt: T + 10 * DAY });
     const ats = ev.map((e) => e.at);

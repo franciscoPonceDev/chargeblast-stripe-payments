@@ -1,11 +1,29 @@
 "use client";
+import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { AppShell } from "@/components/shell/AppShell";
 import { SearchInput } from "@/components/payments/filters/SearchInput";
 
 const noop = () => {};
 
-/** Client boundary for the details page: the shell needs a search node, and the input holds client state. */
+/** Client boundary for the details page. Enter in the search box jumps to the list filtered by that text. */
 export function DetailsShell({ children }: { children: ReactNode }) {
-  return <AppShell search={<SearchInput value="" onChange={noop} />}>{children}</AppShell>;
+  const router = useRouter();
+  return (
+    <AppShell
+      search={
+        <div
+          onKeyDown={(e) => {
+            if (e.key !== "Enter" || !(e.target instanceof HTMLInputElement)) return;
+            const q = e.target.value.trim();
+            if (q) router.push(`/payments?${new URLSearchParams({ q })}`);
+          }}
+        >
+          <SearchInput value="" onChange={noop} />
+        </div>
+      }
+    >
+      {children}
+    </AppShell>
+  );
 }

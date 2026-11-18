@@ -15,7 +15,8 @@ describe("PaymentPage", { timeout: 30_000 }, () => {
     render(await PaymentPage(params(succeeded.id)));
     const h1 = screen.getByRole("heading", { level: 1 });
     expect(h1).toHaveTextContent(formatAmount(succeeded.amount, succeeded.currency));
-    expect(within(h1).getByText("Succeeded")).toBeInTheDocument();
+    expect(screen.getAllByText("Succeeded").length).toBeGreaterThan(0);
+    expect(within(h1).queryByText("Succeeded")).not.toBeInTheDocument();
     expect(screen.getByText("Payment started")).toBeInTheDocument();
     expect(screen.getByText("Payment succeeded")).toBeInTheDocument();
     expect(screen.getByText("Statement descriptor")).toBeInTheDocument();
@@ -36,5 +37,15 @@ describe("PaymentPage", { timeout: 30_000 }, () => {
     expect(generateStaticParams()).toHaveLength(600);
     const m = await generateMetadata(params(succeeded.id));
     expect(m.title).toMatch(/^Payment pi_/);
+  });
+});
+
+describe("details search", () => {
+  it("Enter navigates to the list with the query", async () => {
+    const { default: userEvent } = await import("@testing-library/user-event");
+    const { useRouter } = await import("next/navigation");
+    render(await PaymentPage(params(succeeded.id)));
+    await userEvent.type(screen.getAllByLabelText("Search")[0], "jane doe{Enter}");
+    expect(useRouter().push).toHaveBeenCalledWith("/payments?q=jane+doe");
   });
 });

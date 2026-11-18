@@ -42,20 +42,24 @@ export function PaymentDetails({ payment: p, now }: { payment: Payment; now: num
   const metadata = metadataFor(p.id);
   return (
     <div className="max-w-4xl">
-      <Link
-        href="/payments"
-        className="mt-(--space-page-top) inline-flex items-center gap-1 rounded-sm text-body font-semibold text-text-secondary hover:text-text-primary focus-visible:shadow-focus"
-      >
-        <Icon name="chevron-down" size={12} className="rotate-90" />
-        Payments
-      </Link>
+      <nav aria-label="Breadcrumb" className="mt-(--space-page-top)">
+        <Link
+          href="/payments"
+          className="inline-flex items-center gap-1 rounded-sm text-body font-semibold text-text-secondary hover:text-text-primary focus-visible:shadow-focus"
+        >
+          <Icon name="chevron-down" size={12} className="rotate-90" />
+          Payments
+        </Link>
+      </nav>
       <header className="mt-3 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="flex flex-wrap items-center gap-x-2 gap-y-1 text-h1 font-bold text-text-primary">
-            <span className="tabular-nums">{formatAmount(p.amount, p.currency)}</span>
-            <span className="text-body font-normal text-text-muted">{currencyCode(p.currency)}</span>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <h1 className="flex items-baseline gap-2 text-h1 font-bold text-text-primary">
+              <span className="tabular-nums">{formatAmount(p.amount, p.currency)}</span>
+              <span className="text-body font-normal text-text-muted">{currencyCode(p.currency)}</span>
+            </h1>
             <StatusBadge status={p.status} />
-          </h1>
+          </div>
           <p className="mt-1 flex flex-wrap items-center gap-x-2 text-text-secondary">
             <span>{formatDateTime(p.created, now)}</span>
             <span aria-hidden="true">·</span>

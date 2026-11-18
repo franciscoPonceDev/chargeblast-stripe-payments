@@ -3,7 +3,10 @@ import "@testing-library/jest-dom/vitest";
 import { afterEach, vi } from "vitest";
 import { cleanup } from "@testing-library/react";
 
-afterEach(() => cleanup());
+afterEach(() => {
+  cleanup();
+  vi.clearAllMocks();
+});
 
 // jsdom lacks ResizeObserver (Radix Checkbox inside a <form> measures its bubble input).
 if (typeof globalThis.ResizeObserver === "undefined") {
@@ -22,4 +25,5 @@ const router = vi.hoisted(() => ({
 vi.mock("next/navigation", async (importActual) => ({
   ...(await importActual<typeof import("next/navigation")>()),
   useRouter: () => router,
+  usePathname: () => "/payments",
 }));

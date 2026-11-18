@@ -44,7 +44,7 @@ export function buildColumns({ sort, onSortChange, now }: ColumnCtx): ColumnDef<
       cell: ({ row: { original: p } }) => (
         <Link
           href={`/payments/${p.id}`}
-          aria-label={`View payment ${shortenId(p.id)}`}
+          aria-label={`${formatAmount(p.amount, p.currency)}, view payment ${shortenId(p.id)}`}
           className="rounded-sm font-semibold tabular-nums hover:underline focus-visible:shadow-focus"
         >
           {formatAmount(p.amount, p.currency)}

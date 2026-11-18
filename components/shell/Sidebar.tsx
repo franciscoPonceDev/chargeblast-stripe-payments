@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import clsx from "clsx";
 import { useId, useState } from "react";
 import { Icon, type IconName } from "@/components/ui";
@@ -74,6 +75,7 @@ function Disclosure({ label, icon, children }: (typeof PRODUCTS)[number]) {
 }
 
 export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
+  const pathname = usePathname();
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-(--size-topbar) shrink-0 items-center px-(--space-sidebar-x)">
@@ -102,7 +104,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
               <li key={i.label}>
                 <Link
                   href="/payments"
-                  aria-current="page"
+                  aria-current={pathname === "/payments" ? "page" : "true"}
                   onClick={onNavigate}
                   className={clsx(ITEM, "bg-sidebar-active-bg font-semibold text-brand")}
                 >

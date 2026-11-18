@@ -12,6 +12,12 @@ describe("fees", () => {
     expect(feeFor(p)).toBe(180);
     expect(netFor(p)).toBe(4_820);
   });
+  it("still charges a fee on refunded payments", () => {
+    expect(feeFor({ amount: 10_000, currency: "usd", status: "refunded" })).toBe(320);
+  });
+  it("never makes net negative", () => {
+    expect(netFor({ amount: 10, currency: "usd", status: "succeeded" })).toBe(0);
+  });
   it("charges nothing when no money moved", () => {
     expect(feeFor({ amount: 10_000, currency: "usd", status: "failed" })).toBe(0);
     expect(netFor({ amount: 10_000, currency: "usd", status: "pending" })).toBe(10_000);

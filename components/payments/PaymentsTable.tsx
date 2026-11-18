@@ -99,7 +99,10 @@ function PaymentsTableImpl({
                 key={row.id}
                 className="group h-11 cursor-pointer hover:bg-bg-hover focus-within:bg-bg-hover"
                 onClick={(e) => {
-                  if ((e.target as Element).closest(INTERACTIVE)) return;
+                  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+                  if (window.getSelection()?.toString()) return;
+                  const el = (e.target as Element).closest(INTERACTIVE);
+                  if (el && e.currentTarget.contains(el)) return;
                   router.push(`/payments/${row.original.id}`);
                 }}
               >

@@ -2,8 +2,8 @@ import { currencyDecimals } from "./query";
 import type { Payment } from "./types";
 
 const RATE_BPS = 290; // 2.9%
-const FIXED_FEE_MINOR = 30; // 30 cents; zero-decimal currencies get no fixed fee
-const ZERO_DECIMAL_RATE_BPS = 360;
+const FIXED_FEE_MINOR = 30; // 30 cents, decimal currencies only
+const ZERO_DECIMAL_RATE_BPS = 360; // zero-decimal currencies (JPY): 3.6% and no fixed fee
 
 type Priced = Pick<Payment, "amount" | "currency" | "status">;
 
@@ -15,7 +15,7 @@ export function feeFor(p: Priced): number {
 }
 
 export function netFor(p: Priced): number {
-  return p.amount - feeFor(p);
+  return p.amount - Math.min(feeFor(p), p.amount);
 }
 
 /** What shows on the cardholder's statement: "ACME* <DESC>" capped at 22 characters. */

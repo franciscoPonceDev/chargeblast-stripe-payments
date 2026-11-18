@@ -1,7 +1,7 @@
 import { currencyDecimals, STATUS_LABELS } from './query';
 import type { Payment } from './types';
 
-export const CSV_BOM = '﻿';
+export const CSV_BOM = '\uFEFF';
 const EOL = '\r\n';
 
 export const CSV_HEADER = [
@@ -37,7 +37,7 @@ function isoOrEmpty(ms: number | null): string {
 
 function row(p: Payment): string {
   const decimals = currencyDecimals(p.currency);
-  // Amount is numeric by construction (never starts with a formula character in practice), so it skips the guard.
+  // Amount is a number, not text: a negative value must stay numeric in spreadsheets, so it is intentionally not guarded.
   const amount = (p.amount / 10 ** decimals).toFixed(decimals);
   return [
     escapeCell(p.id),

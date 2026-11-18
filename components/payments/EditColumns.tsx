@@ -13,6 +13,7 @@ export interface EditColumnsProps {
 export function EditColumns({ settings, onColumnVisibleChange, onWrapChange, onReset }: EditColumnsProps) {
   const titleId = useId();
   const wrapId = useId();
+  const switchId = useId();
   const columnsId = useId();
   return (
     <Popover
@@ -26,11 +27,12 @@ export function EditColumns({ settings, onColumnVisibleChange, onWrapChange, onR
       </h2>
       <div className="border-b border-border px-4 py-2">
         <div className="flex items-center justify-between py-1">
-          <span id={wrapId} className="text-body leading-5">
+          <label id={wrapId} htmlFor={switchId} className="flex-1 cursor-pointer text-body leading-5">
             Wrap cells
-          </span>
+          </label>
           <button
             type="button"
+            id={switchId}
             role="switch"
             aria-checked={settings.wrap}
             aria-labelledby={wrapId}
@@ -39,7 +41,7 @@ export function EditColumns({ settings, onColumnVisibleChange, onWrapChange, onR
           >
             <span
               aria-hidden
-              className={`absolute top-0.5 left-0.5 size-3.5 rounded-full bg-surface shadow-checkbox transition-transform ${settings.wrap ? "translate-x-4" : ""}`}
+              className={`absolute top-0.5 left-0.5 size-3.5 rounded-full bg-surface shadow-checkbox transition-transform motion-reduce:transition-none ${settings.wrap ? "translate-x-4" : ""}`}
             />
           </button>
         </div>
@@ -49,7 +51,11 @@ export function EditColumns({ settings, onColumnVisibleChange, onWrapChange, onR
           Columns
         </div>
         {COLUMN_OPTIONS.map((c) => (
-          <label key={c.id} className="flex h-8 items-center gap-2 py-1.5 pl-1 text-body leading-5">
+          <label
+            key={c.id}
+            title={c.locked ? "Amount is always shown" : undefined}
+            className="flex h-8 items-center py-1.5 pl-1 text-body leading-5"
+          >
             <Checkbox
               aria-label={c.label}
               checked={c.locked || !settings.hidden.includes(c.id)}

@@ -1,5 +1,6 @@
 "use client";
 import { format } from "date-fns";
+import { useId, useRef, useState } from "react";
 import { Button } from "@/components/ui";
 import { filterPayments, sortPayments, type PaymentsQuery } from "@/lib/payments/query";
 import type { Payment } from "@/lib/payments/types";
@@ -21,21 +22,51 @@ function download(csv: string, filename: string) {
   document.body.append(a);
   a.click();
   a.remove();
-  URL.revokeObjectURL(url);
+  // Trade-off: revoke after a delay; some browsers start the download asynchronously and an instant revoke can cancel it.
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
 }
 
 export function ExportButton({ all, status, query, now }: ExportButtonProps) {
+  const reasonId = useId();
+  const busy = useRef(false);
+  const [failed, setFailed] = useState(false);
   const reason = status === "ready" && all ? undefined : status === "error" ? "Couldn't load payments" : "Loading payments…";
   const onClick = async () => {
-    if (!all) return;
-    // Trade-off: CSV module loaded on click so it stays out of the first-load bundle, at the cost of a tiny first-export delay.
-    const { toCsv } = await import("@/lib/payments/csv");
-    const rows = sortPayments(filterPayments(all, query, now), query.sort);
-    download(toCsv(rows), `payments-${format(Date.now(), "yyyy-MM-dd", { in: appTz })}.csv`);
+    if (!all || busy.current) return;
+    busy.current = true;
+    setFailed(false);
+    try {
+      // Trade-off: CSV module loaded on click so it stays out of the first-load bundle, at the cost of a tiny first-export delay.
+      const { toCsv } = await import("@/lib/payments/csv");
+      const rows = sortPayments(filterPayments(all, query, now), query.sort);
+      download(toCsv(rows), `payments-${format(now, "yyyy-MM-dd", { in: appTz })}.csv`);
+    } catch {
+      setFailed(true);
+    } finally {
+      busy.current = false;
+    }
   };
   return (
-    <Button icon="export" disabled={!!reason} title={reason} aria-description={reason} onClick={onClick}>
-      Export
-    </Button>
+    <>
+      {/* aria-disabled (not disabled) keeps the button focusable so keyboard and screen-reader users can learn why. */}
+      <Button
+        icon="export"
+        aria-disabled={reason ? true : undefined}
+        aria-describedby={reason ? reasonId : undefined}
+        title={reason}
+        className="aria-disabled:cursor-not-allowed aria-disabled:opacity-50 aria-disabled:hover:bg-surface!"
+        onClick={reason ? undefined : onClick}
+      >
+        Export
+      </Button>
+      {reason && (
+        <span id={reasonId} className="sr-only">
+          {reason}
+        </span>
+      )}
+      <div role="status" className={failed ? "text-caption leading-4 text-text-secondary" : "sr-only"}>
+        {failed ? "Couldn't export payments. Try again." : ""}
+      </div>
+    </>
   );
 }

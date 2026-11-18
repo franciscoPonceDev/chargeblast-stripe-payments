@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
 import { DEFAULT_QUERY } from "@/lib/payments/query";
@@ -117,5 +117,32 @@ describe("Edit columns", () => {
     await open();
     await userEvent.click(screen.getByRole("checkbox", { name: "Status" }));
     expect(JSON.parse(localStorage.getItem(TABLE_SETTINGS_KEY) ?? "{}")).toEqual({ hidden: ["status"], wrap: false });
+  });
+
+  it("toggles the switch from its label text and marks Amount as always shown", async () => {
+    render(<Harness />);
+    await open();
+    await userEvent.click(screen.getByText("Wrap cells"));
+    expect(screen.getByRole("switch", { name: "Wrap cells" })).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByText("Amount", { selector: "label" })).toHaveAttribute("title", "Amount is always shown");
+  });
+
+  it("de-duplicates saved hidden ids", async () => {
+    localStorage.setItem(TABLE_SETTINGS_KEY, JSON.stringify({ hidden: ["status", "status"], wrap: false }));
+    render(<Harness />);
+    await screen.findByText("card_declined");
+    await open();
+    await userEvent.click(screen.getByRole("checkbox", { name: "Status" }));
+    expect(headers()).toContain("Status");
+  });
+
+  it("syncs from another tab via storage events", async () => {
+    render(<Harness />);
+    expect(headers()).toContain("Status");
+    act(() => {
+      localStorage.setItem(TABLE_SETTINGS_KEY, JSON.stringify({ hidden: ["status"], wrap: false }));
+      window.dispatchEvent(new StorageEvent("storage", { key: TABLE_SETTINGS_KEY }));
+    });
+    expect(headers()).not.toContain("Status");
   });
 });

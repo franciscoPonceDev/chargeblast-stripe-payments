@@ -33,7 +33,7 @@ function parse(raw: string | null): TableSettings {
     if (typeof v !== "object" || v === null) return DEFAULT_TABLE_SETTINGS;
     const { hidden, wrap } = v as Partial<Record<keyof TableSettings, unknown>>;
     return {
-      hidden: Array.isArray(hidden) ? hidden.filter((id): id is string => typeof id === "string" && HIDEABLE.has(id)) : [],
+      hidden: Array.isArray(hidden) ? [...new Set(hidden.filter((id): id is string => typeof id === "string" && HIDEABLE.has(id)))] : [],
       wrap: wrap === true,
     };
   } catch {
@@ -46,14 +46,23 @@ export function useTableSettings() {
   const [settings, setSettings] = useState<TableSettings>(DEFAULT_TABLE_SETTINGS);
   const [loaded, setLoaded] = useState(false);
 
-  // Read after mount so the server render and first client render both use the defaults.
+  // Trade-off: read after mount so SSR and first client render match; a saved layout appears after a brief flash.
   useEffect(() => {
-    try {
-      setSettings(parse(localStorage.getItem(TABLE_SETTINGS_KEY)));
-    } catch {
-      /* storage unavailable: keep defaults */
-    }
+    const read = () => {
+      try {
+        setSettings(parse(localStorage.getItem(TABLE_SETTINGS_KEY)));
+      } catch {
+        /* storage unavailable: keep defaults */
+      }
+    };
+    read();
     setLoaded(true);
+    // Keep other tabs in sync.
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === TABLE_SETTINGS_KEY || e.key === null) read();
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, []);
 
   useEffect(() => {

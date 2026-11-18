@@ -21,7 +21,7 @@ const lines = (csv: string) => csv.slice(1).split('\r\n');
 describe('toCsv', () => {
   it('starts with a UTF-8 BOM and a header row, with CRLF endings', () => {
     const csv = toCsv([base]);
-    expect(csv.startsWith('﻿')).toBe(true);
+    expect(csv.startsWith('\uFEFF')).toBe(true);
     expect(lines(csv)[0]).toBe(
       'id,created,amount,currency,status,payment_method,last4,description,customer_name,customer_email,refunded_at,decline_reason',
     );
@@ -71,6 +71,16 @@ describe('toCsv', () => {
     const csv = toCsv([{ ...base, description: value }]);
     const cell = `'${value}`;
     expect(csv.includes(`,${cell},`) || csv.includes(`,"${cell}",`)).toBe(true);
+  });
+
+  it('round-trips unicode and emoji untouched', () => {
+    const name = 'Zoë Müller 日本 ' + String.fromCodePoint(0x1f600);
+    expect(toCsv([{ ...base, customerName: name }])).toContain(`,${name},`);
+  });
+
+  it.each(['customerName', 'customerEmail'] as const)('guards a %s starting with a dash', (key) => {
+    const csv = toCsv([{ ...base, [key]: '-evil' }]);
+    expect(csv).toContain(",'-evil,");
   });
 
   it('does not guard the numeric amount column', () => {

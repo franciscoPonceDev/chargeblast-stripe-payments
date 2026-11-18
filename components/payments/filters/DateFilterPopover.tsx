@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { format, isValid, parseISO } from "date-fns";
+import { appTz } from "@/lib/time";
 import type { DateFilter } from "@/lib/payments/query";
 import { FilterForm, FilterPill, inputClass } from "./FilterPill";
 
@@ -15,8 +16,8 @@ const PRESETS: { id: Preset; label: string }[] = [
 
 function day(s: string | null): string | null {
   if (!s) return null;
-  const d = parseISO(s);
-  return isValid(d) ? format(d, "MMM d") : null;
+  const d = parseISO(s, { in: appTz });
+  return isValid(d) ? format(d, "MMM d", { in: appTz }) : null;
 }
 
 export function dateSummary(f: DateFilter): string | null {

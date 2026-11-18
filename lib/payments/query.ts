@@ -1,4 +1,5 @@
 import { endOfDay, isValid, parseISO, startOfDay, subDays } from 'date-fns';
+import { appTz } from '@/lib/time';
 import type { Currency, MethodType, Payment, PaymentStatus } from './types';
 
 export type StatusTab = 'all' | 'succeeded' | 'refunded' | 'disputed' | 'failed' | 'uncaptured';
@@ -91,7 +92,7 @@ function matchesSearch(p: Payment, raw: string): boolean {
 
 function parseDay(s: string | null): Date | null {
   if (!s) return null;
-  const d = parseISO(s);
+  const d = parseISO(s, { in: appTz });
   return isValid(d) ? d : null;
 }
 
@@ -101,16 +102,16 @@ function dateBounds(f: DateFilter, now: number): [number | null, number | null] 
     case 'all':
       return [null, null];
     case 'today':
-      return [startOfDay(now).getTime(), null];
+      return [startOfDay(now, { in: appTz }).getTime(), null];
     case '7d':
-      return [subDays(now, 7).getTime(), null];
+      return [subDays(now, 7, { in: appTz }).getTime(), null];
     case '30d':
-      return [subDays(now, 30).getTime(), null];
+      return [subDays(now, 30, { in: appTz }).getTime(), null];
     case 'custom': {
       let from = parseDay(f.from);
       let to = parseDay(f.to);
       if (from && to && from.getTime() > to.getTime()) [from, to] = [to, from];
-      return [from ? startOfDay(from).getTime() : null, to ? endOfDay(to).getTime() : null];
+      return [from ? startOfDay(from, { in: appTz }).getTime() : null, to ? endOfDay(to, { in: appTz }).getTime() : null];
     }
   }
 }

@@ -47,3 +47,7 @@ Source of truth: `app/globals.css` (`@theme`). Current values are provisional; t
 | `--space-page-top` | `24px` | page top padding |
 | `--size-topbar` | `56px` | top bar height |
 | `--text-h1` / line-height | `28px` / `36px` | page title |
+| `--size-search-max` | `480px` | top bar search max width |
+| `--space-section` | `16px` | vertical gap between page sections |
+| `--space-page-bottom` | `24px` | page bottom padding |
+| `--text-caption` / line-height | `12px` / `16px` | small labels (chips) |

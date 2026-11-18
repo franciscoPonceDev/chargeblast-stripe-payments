@@ -1,4 +1,5 @@
 "use client";
+import { useCallback, useRef } from "react";
 import { Banner } from "@/components/payments/Banner";
 import { FilterBar } from "@/components/payments/filters/FilterBar";
 import { SearchInput } from "@/components/payments/filters/SearchInput";
@@ -10,27 +11,33 @@ import { Button } from "@/components/ui";
 import data from "@/data/payments.json";
 import { MOCK_NOW } from "@/lib/payments/generate";
 import type { Payment } from "@/lib/payments/types";
+import type { SortState } from "@/lib/payments/query";
 import { usePaymentsQuery } from "@/lib/payments/usePaymentsQuery";
 
 const ALL = data as Payment[];
 
 export default function PaymentsPage() {
   const { query, result, update, setPage } = usePaymentsQuery(ALL, MOCK_NOW);
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const onSortChange = useCallback((sort: SortState[]) => update({ sort }), [update]);
+  const focusTabs = useCallback(() => {
+    tabsRef.current?.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]')?.focus();
+  }, []);
   return (
-    <main className="px-(--space-page-x) pb-6">
+    <main className="px-(--space-page-x) pb-(--space-page-bottom)">
       <div className="flex h-(--size-topbar) items-center">
-        <div className="w-full max-w-[480px]">
+        <div className="w-full max-w-(--size-search-max)">
           <SearchInput value={query.search} onChange={(search) => update({ search })} />
         </div>
       </div>
       <PageHeader />
-      <div className="mt-4">
-        <Banner />
+      <div className="mt-(--space-section)">
+        <Banner onDismiss={focusTabs} />
       </div>
-      <div className="mt-4">
+      <div className="mt-(--space-section)" ref={tabsRef}>
         <StatusTabs value={query.tab} onChange={(tab) => update({ tab })} />
       </div>
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+      <div className="mt-(--space-section) flex flex-wrap items-center justify-between gap-2">
         <FilterBar query={query} onChange={update} />
         <div className="flex items-center gap-2">
           <Button size="sm" icon="export">Export</Button>
@@ -38,7 +45,7 @@ export default function PaymentsPage() {
         </div>
       </div>
       <div className="mt-3 overflow-x-auto">
-        <PaymentsTable rows={result.rows} sort={query.sort} onSortChange={(sort) => update({ sort })} now={MOCK_NOW} />
+        <PaymentsTable rows={result.rows} sort={query.sort} onSortChange={onSortChange} now={MOCK_NOW} />
       </div>
       <TableFooter
         result={result}

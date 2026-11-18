@@ -48,6 +48,11 @@
   --space-page-x: 32px;
   --space-page-top: 24px;
   --size-topbar: 56px;
+  --size-search-max: 480px;
+  --space-section: 16px;
+  --space-page-bottom: 24px;
+  --text-caption: 12px;
+  --text-caption--line-height: 16px;
   --text-h1: 28px;
   --text-h1--line-height: 36px;
   --text-body: 14px;

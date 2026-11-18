@@ -1,4 +1,5 @@
-import { format, formatDistanceStrict } from 'date-fns';
+import { format, formatDistanceStrict, getYear } from 'date-fns';
+import { appTz } from '@/lib/time';
 import { currencyDecimals } from '@/lib/payments/query';
 import type { Currency } from '@/lib/payments/types';
 
@@ -30,8 +31,8 @@ export function currencyCode(currency: Currency): string {
 }
 
 export function formatDateTime(ms: number, now: number): string {
-  const sameYear = new Date(ms).getFullYear() === new Date(now).getFullYear();
-  return format(ms, sameYear ? 'MMM d, h:mm a' : 'MMM d, yyyy, h:mm a');
+  const sameYear = getYear(ms, { in: appTz }) === getYear(now, { in: appTz });
+  return format(ms, sameYear ? 'MMM d, h:mm a' : 'MMM d, yyyy, h:mm a', { in: appTz });
 }
 
 export function formatRelative(ms: number, now: number): string {

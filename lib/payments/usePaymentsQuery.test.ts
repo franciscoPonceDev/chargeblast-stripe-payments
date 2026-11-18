@@ -38,4 +38,24 @@ describe("usePaymentsQuery", () => {
     act(() => result.current.reset());
     expect(result.current.query.tab).toBe("all");
   });
+  it("search and tab reset page from a later page", () => {
+    const { result } = setup();
+    act(() => result.current.setPage(3));
+    act(() => result.current.update({ search: "a" }));
+    expect(result.current.query.page).toBe(0);
+    act(() => result.current.setPage(2));
+    act(() => result.current.update({ tab: "failed" }));
+    expect(result.current.query.page).toBe(0);
+  });
+  it("setPage out of range clamps in result", () => {
+    const { result } = setup();
+    act(() => result.current.setPage(999));
+    expect(result.current.result.page).toBe(result.current.result.pageCount - 1);
+  });
+  it("empty patch resets page", () => {
+    const { result } = setup();
+    act(() => result.current.setPage(2));
+    act(() => result.current.update({}));
+    expect(result.current.query.page).toBe(0);
+  });
 });

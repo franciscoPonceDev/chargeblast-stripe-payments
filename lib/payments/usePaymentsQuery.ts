@@ -17,7 +17,8 @@ export function usePaymentsQuery(all: Payment[], now: number) {
   const result: QueryResult = useMemo(() => applyQuery(all, query, now), [all, query, now]);
 
   const update = useCallback((patch: Partial<PaymentsQuery>) => {
-    const pageOnly = Object.keys(patch).every((k) => k === "page");
+    const keys = Object.keys(patch);
+    const pageOnly = keys.length > 0 && keys.every((k) => k === "page");
     setQuery((q) => ({ ...q, ...patch, ...(pageOnly ? {} : { page: 0 }) }));
   }, []);
   const setPage = useCallback((n: number) => setQuery((q) => ({ ...q, page: n })), []);

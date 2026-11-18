@@ -44,6 +44,12 @@
   --size-control-md: 28px;
   --size-checkbox: 14px;
 
+  --color-bg-subtle: #f6f8fa;
+  --space-page-x: 32px;
+  --space-page-top: 24px;
+  --size-topbar: 56px;
+  --text-h1: 28px;
+  --text-h1--line-height: 36px;
   --text-body: 14px;
   --text-body--line-height: 20px;
   --text-mark: 8px;

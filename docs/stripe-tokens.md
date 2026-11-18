@@ -42,3 +42,8 @@ Source of truth: `app/globals.css` (`@theme`). Current values are provisional; t
 | `--color-mark-google` | `#ffffff` | generic chip color, not a logo |
 | `--color-mark-link` | `#00d66f` | generic chip color, not a logo |
 | `--text-mark` / line-height | `8px` / `10px` | brand/wallet chip text |
+| `--color-bg-subtle` | `#f6f8fa` | banner background |
+| `--space-page-x` | `32px` | page horizontal padding |
+| `--space-page-top` | `24px` | page top padding |
+| `--size-topbar` | `56px` | top bar height |
+| `--text-h1` / line-height | `28px` / `36px` | page title |

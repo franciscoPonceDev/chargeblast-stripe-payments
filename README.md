@@ -212,7 +212,7 @@ Tried and not kept: `content-visibility` on rows (no effect), lazy popover bodie
 | Gate | Count / threshold | Runs where |
 | --- | --- | --- |
 | Unit and component tests (Vitest) | 319 passing | CI, local |
-| Playwright e2e | 16 (13 functional + 3 axe accessibility) | CI, local |
+| Playwright e2e | 22 (19 functional + 3 axe accessibility) | CI, local |
 | Visual regression | 3 baselines (win32) | Local only |
 | Lint, typecheck, production build | must pass | CI |
 | Lighthouse CI (desktop preset, 3 runs) | Performance >= 95, Accessibility >= 95, Best practices >= 90, CLS <= 0.02, LCP <= 1.5 s; SEO >= 90 warns | CI |

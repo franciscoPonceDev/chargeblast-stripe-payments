@@ -67,7 +67,7 @@ export function ExportButton({ all, status, query, now }: ExportButtonProps) {
         </span>
       )}
       {/* Out of flow (anchored under the button cluster, inside the 16px gap above the table) so the message cannot shift neighbours. */}
-      <div role="status" className={failed ? "absolute top-full right-0 mt-0.5 text-caption leading-4 whitespace-nowrap text-text-secondary" : "sr-only"}>
+      <div role="status" className={failed ? "absolute top-full right-0 text-caption leading-4 whitespace-nowrap text-text-secondary" : "sr-only"}>
         {failed ? "Couldn't export payments. Try again." : ""}
       </div>
     </>

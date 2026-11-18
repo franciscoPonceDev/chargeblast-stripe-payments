@@ -41,7 +41,7 @@ export function usePaymentsQuery(
   const result: QueryResult = useMemo(() => {
     if (!all) return initial.result;
     const next = applyQuery(all, query, now);
-    // Perf: when the full dataset lands and the page is unchanged (same ids, same dataset version), keep the server
+    // Perf: when the full dataset lands and the page is unchanged (same totals and row ids; loadAll is keyed by the DATA_VERSION hash so the dataset cannot differ), keep the server
     // result's identity so the memoised table does not re-render 25+ rows with identical content.
     const prev = initial.result;
     const same =

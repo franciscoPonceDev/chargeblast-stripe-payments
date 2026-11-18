@@ -36,6 +36,31 @@ describe("buildCsp", () => {
   });
 });
 
+describe("origin hardening", () => {
+  const gtm = (gtmServerUrl: string) => buildCsp({ ...prod, gtmId: "GTM-TEST", gtmServerUrl });
+  it.each([
+    "https://x.com;frame-src",
+    "https://x.com,evil.com",
+    "https://x.com evil.com",
+    "https://x.com'",
+    'https://x.com"',
+    "http://sgtm.example.com",
+    "ftp://sgtm.example.com",
+    "javascript:alert(1)",
+    "not a url",
+  ])("drops %s", (url) => {
+    const csp = gtm(url);
+    expect(csp).not.toMatch(/x\.com|sgtm|frame-src|evil/);
+    expect(csp.split("; ").map((d) => d.split(" ")[0])).toEqual([
+      "default-src", "script-src", "style-src", "img-src", "font-src", "connect-src", "object-src", "base-uri", "form-action", "frame-ancestors",
+    ]);
+  });
+  it("keeps a valid https origin and allows http localhost", () => {
+    expect(gtm("https://sgtm.example.com:8443/p?q=1")).toContain("https://sgtm.example.com:8443");
+    expect(gtm("http://localhost:3000/x")).toContain("http://localhost:3000");
+  });
+});
+
 describe("securityHeaders", () => {
   it("sends HSTS only in production", () => {
     expect(securityHeaders(prod).map((h) => h.key)).toContain("Strict-Transport-Security");

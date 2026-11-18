@@ -7,6 +7,7 @@ import {
   formatRelative,
   shortenId,
 } from '@/lib/format';
+import type { Currency } from '@/lib/payments/types';
 
 const NOW = Date.UTC(2026, 10, 17, 12, 0, 0);
 
@@ -23,16 +24,22 @@ describe('formatAmount', () => {
 });
 
 describe('formatAmount fast path vs Intl', () => {
-  const CURRENCIES = ['usd', 'gbp', 'eur', 'brl', 'cad', 'jpy'] as const;
-  const AMOUNTS = [0, 1, 5, 9, 10, 99, 100, 101, 999, 1000, 99999, 100000, 123456, 99999999, 123456789, 5_000_000_000];
-  const intl = (amount: number, c: (typeof CURRENCIES)[number]) => {
+  const CURRENCIES: Currency[] = ['usd', 'gbp', 'eur', 'brl', 'cad', 'jpy'];
+  const POSITIVE = [0, 1, 5, 9, 10, 99, 100, 101, 999, 1000, 1005, 99999, 100000, 123456, 99999999, 123456789, 5_000_000_000];
+  const AMOUNTS = [...POSITIVE, ...POSITIVE.filter((a) => a > 0).map((a) => -a), -988];
+  // en-US narrowSymbol puts the sign first and no space after the symbol; the app writes "R$ 1.00" for the two-character BRL symbol.
+  const intl = (amount: number, c: Currency) => {
     const value = amount / 10 ** (c === 'jpy' ? 0 : 2);
     const out = new Intl.NumberFormat('en-US', { style: 'currency', currency: c.toUpperCase(), currencyDisplay: 'narrowSymbol' }).format(value);
-    const m = out.match(/^(\D+)(\d.*)$/);
-    return m && m[1].length > 1 ? `${m[1]} ${m[2]}` : out;
+    return c === 'brl' ? out.replace('R$', 'R$ ') : out;
   };
   it('matches Intl.NumberFormat', () => {
     for (const c of CURRENCIES) for (const a of AMOUNTS) expect(formatAmount(a, c), `${a} ${c}`).toBe(intl(a, c));
+  });
+  it('has literal BRL expectations', () => {
+    expect(formatAmount(1, 'brl')).toBe('R$ 0.01');
+    expect(formatAmount(-988, 'brl')).toBe('-R$ 9.88');
+    expect(formatAmount(123456789, 'brl')).toBe('R$ 1,234,567.89');
   });
 });
 

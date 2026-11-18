@@ -9,7 +9,11 @@ export interface SecurityEnv {
 function origin(url: string | undefined): string | null {
   if (!url) return null;
   try {
-    return new URL(url).origin;
+    const u = new URL(url);
+    const isLocal = u.protocol === "http:" && (u.hostname === "localhost" || u.hostname === "127.0.0.1");
+    if (u.protocol !== "https:" && !isLocal) return null;
+    // Reject anything that could terminate the source expression and start a new CSP directive.
+    return /[;,\s"'\\]/.test(u.origin) ? null : u.origin;
   } catch {
     return null;
   }

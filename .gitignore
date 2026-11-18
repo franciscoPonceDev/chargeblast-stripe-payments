@@ -1,6 +1,5 @@
 *.pdf
 .env*
-!.env.example
 .next/
 .superpowers/
 email.md
@@ -19,3 +18,7 @@ npm-debug.log*
 *.tsbuildinfo
 next-env.d.ts
 docs/stripe-capture/
+scripts/seed-stripe.mjs
+scripts/capture-stripe-styles.js
+scripts/screenshot.mjs
+scripts/shell-shots.mjs

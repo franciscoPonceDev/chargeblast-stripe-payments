@@ -1,10 +1,19 @@
+import type { Metadata } from "next";
 import { cookies } from "next/headers";
+import { SITE_NAME } from "@/lib/seo";
 import { PaymentsView } from "@/components/payments/PaymentsView";
 import { ALL_PAYMENTS, DATA_VERSION } from "@/lib/payments/data";
 import { MOCK_NOW } from "@/lib/payments/generate";
 import { applyQuery, tabCounts } from "@/lib/payments/query";
 import { BANNER_COOKIE, parseVariant } from "@/lib/experiments";
 import { parseQuery } from "@/lib/payments/url";
+
+export const metadata: Metadata = {
+  title: "Transactions",
+  alternates: { canonical: "/payments" },
+  openGraph: { type: "website", siteName: SITE_NAME, locale: "en_US", title: "Transactions", url: "/payments", images: ["/opengraph-image"] },
+  twitter: { card: "summary_large_image", title: "Transactions", images: ["/opengraph-image"] },
+};
 
 export default async function PaymentsPage({
   searchParams,

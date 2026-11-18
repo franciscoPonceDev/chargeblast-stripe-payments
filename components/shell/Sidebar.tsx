@@ -143,6 +143,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           <IconBox name="terminal" />
           Developers
         </button>
+        <p className="mt-2 px-1.5 text-caption text-text-muted">Demo · Not affiliated with Stripe</p>
       </div>
     </div>
   );

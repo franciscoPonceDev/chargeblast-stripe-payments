@@ -79,6 +79,7 @@ function PaymentsTableImpl({
   return (
     <div className="relative overflow-x-auto">
       <table className="w-full border-collapse whitespace-nowrap text-table text-text-primary">
+        <caption className="sr-only">Payments</caption>
         <thead>
           {table.getHeaderGroups().map((hg) => (
             <tr key={hg.id} className="h-10">

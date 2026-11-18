@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { track } from "@/lib/analytics/events";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui";
 import { currencyCode, formatAmount, formatDateTime, shortenId } from "@/lib/format";
@@ -44,6 +45,7 @@ export function buildColumns({ sort, onSortChange, now }: ColumnCtx): ColumnDef<
       cell: ({ row: { original: p } }) => (
         <Link
           href={`/payments/${p.id}`}
+          onClick={() => track("payment_opened", {})}
           aria-label={`${formatAmount(p.amount, p.currency)}, view payment ${shortenId(p.id)}`}
           className="rounded-sm font-semibold tabular-nums hover:underline focus-visible:shadow-focus"
         >

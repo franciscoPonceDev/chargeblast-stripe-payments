@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { Icon, Tooltip } from "@/components/ui";
+import { track } from "@/lib/analytics/events";
 
 export function CopyIdButton({ id, visible = false }: { id: string; visible?: boolean }) {
   const [copied, setCopied] = useState(false);
@@ -19,6 +20,7 @@ export function CopyIdButton({ id, visible = false }: { id: string; visible?: bo
     if (!c) return;
     try {
       await c.writeText(id);
+      track("payment_id_copied", {});
       if (!mounted.current) return;
       setCopied(true);
       clearTimeout(timer.current);

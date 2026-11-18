@@ -1,7 +1,9 @@
+import { cookies } from "next/headers";
 import { PaymentsView } from "@/components/payments/PaymentsView";
 import { ALL_PAYMENTS, DATA_VERSION } from "@/lib/payments/data";
 import { MOCK_NOW } from "@/lib/payments/generate";
 import { applyQuery, tabCounts } from "@/lib/payments/query";
+import { BANNER_COOKIE, parseVariant } from "@/lib/experiments";
 import { parseQuery } from "@/lib/payments/url";
 
 export default async function PaymentsPage({
@@ -12,6 +14,8 @@ export default async function PaymentsPage({
   // Trade-off: reading searchParams makes this route dynamic; correct first paint for shared links beats static HTML.
   const parsed = parseQuery((await searchParams) ?? {});
   const { rows, total, page } = applyQuery(ALL_PAYMENTS, parsed, MOCK_NOW);
+  // The cookie is assigned in middleware.ts, so the banner copy is correct on the first server render.
+  const bannerVariant = parseVariant((await cookies()).get(BANNER_COOKIE)?.value) ?? "a";
   return (
     <PaymentsView
       initialRows={rows}
@@ -20,6 +24,7 @@ export default async function PaymentsPage({
       counts={tabCounts(ALL_PAYMENTS)}
       now={MOCK_NOW}
       dataVersion={DATA_VERSION}
+      bannerVariant={bannerVariant}
     />
   );
 }

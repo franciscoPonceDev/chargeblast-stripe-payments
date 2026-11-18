@@ -2,6 +2,7 @@
 import { format } from "date-fns";
 import { useId, useRef, useState } from "react";
 import { Button } from "@/components/ui";
+import { track } from "@/lib/analytics/events";
 import { filterPayments, sortPayments, type PaymentsQuery } from "@/lib/payments/query";
 import type { Payment } from "@/lib/payments/types";
 import { appTz } from "@/lib/time";
@@ -40,6 +41,7 @@ export function ExportButton({ all, status, query, now }: ExportButtonProps) {
       const { toCsv } = await import("@/lib/payments/csv");
       const rows = sortPayments(filterPayments(all, query, now), query.sort);
       download(toCsv(rows), `payments-${format(now, "yyyy-MM-dd", { in: appTz })}.csv`);
+      track("export_csv", { row_count: rows.length });
     } catch {
       setFailed(true);
     } finally {

@@ -11,6 +11,9 @@ import { PageHeader } from "@/components/payments/PageHeader";
 import { PaymentsTable } from "@/components/payments/PaymentsTable";
 import { StatusTabs } from "@/components/payments/StatusTabs";
 import { TableFooter } from "@/components/payments/TableFooter";
+import { track } from "@/lib/analytics/events";
+import { trackQueryPatch } from "@/lib/analytics/queryEvents";
+import type { Variant } from "@/lib/experiments";
 import { useTableSettings } from "@/lib/payments/tableSettings";
 import { type PaymentsQuery, type SortState, type StatusTab } from "@/lib/payments/query";
 import { parseQuery, serializeQuery } from "@/lib/payments/url";
@@ -25,6 +28,7 @@ export interface PaymentsViewProps {
   counts: Record<StatusTab, number>;
   now: number;
   dataVersion: string;
+  bannerVariant: Variant;
 }
 
 let inflight: Promise<Payment[]> | null = null;
@@ -60,7 +64,7 @@ function loadAll(version: string): Promise<Payment[]> {
 type LoadStatus = "loading" | "ready" | "error";
 const RETRY_DELAYS_MS = [1000, 3000, 10000];
 
-export function PaymentsView({ initialRows, initialTotal, initialQuery, counts, now, dataVersion }: PaymentsViewProps) {
+export function PaymentsView({ initialRows, initialTotal, initialQuery, counts, now, dataVersion, bannerVariant }: PaymentsViewProps) {
   const [all, setAll] = useState<Payment[] | null>(cachedAll);
   const [status, setStatus] = useState<LoadStatus>(cachedAll ? "ready" : "loading");
   const retryRef = useRef<() => void>(() => {});
@@ -118,7 +122,23 @@ export function PaymentsView({ initialRows, initialTotal, initialQuery, counts, 
     }),
     [initialRows, initialTotal, initialQuery, counts],
   );
-  const { query, result, update, setPage, replace, pending } = usePaymentsQuery(all, now, initial, initialQuery);
+  const { query, result, update: updateQuery, setPage: setQueryPage, replace, pending } = usePaymentsQuery(all, now, initial, initialQuery);
+  const queryRef = useRef(query);
+  queryRef.current = query;
+  const update = useCallback(
+    (patch: Partial<PaymentsQuery>) => {
+      trackQueryPatch(queryRef.current, patch);
+      updateQuery(patch);
+    },
+    [updateQuery],
+  );
+  const setPage = useCallback(
+    (n: number) => {
+      track("page_changed", { page: n + 1, page_size: queryRef.current.pageSize });
+      setQueryPage(n);
+    },
+    [setQueryPage],
+  );
 
   // Keep the URL in step with the query (replace: no history spam) and the query in step with
   // external URL changes (back/forward, in-app links). `synced` is the last query string we wrote or
@@ -152,7 +172,7 @@ export function PaymentsView({ initialRows, initialTotal, initialQuery, counts, 
     <AppShell search={<SearchInput value={query.search} onChange={(search) => update({ search })} />}>
       <PageHeader />
       <div className="mt-(--space-section)">
-        <Banner onDismiss={focusTabs} />
+        <Banner variant={bannerVariant} onDismiss={focusTabs} />
       </div>
       <div className="mt-(--space-section)" ref={tabsRef}>
         <StatusTabs value={query.tab} onChange={(tab) => update({ tab })} />

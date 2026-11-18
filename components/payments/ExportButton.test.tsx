@@ -70,6 +70,13 @@ describe("ExportButton", () => {
     expect(revoke).toHaveBeenCalledWith("blob:x");
   });
 
+  it("pushes export_csv with the exported row count to the dataLayer", async () => {
+    window.dataLayer = [];
+    render(<ExportButton all={all} status="ready" query={DEFAULT_QUERY} now={NOW} />);
+    await userEvent.click(screen.getByRole("button", { name: "Export" }));
+    await waitFor(() => expect(window.dataLayer).toEqual([{ event: "export_csv", row_count: 30 }]));
+  });
+
   it("exports every page of an unfiltered query", async () => {
     render(<ExportButton all={all} status="ready" query={DEFAULT_QUERY} now={NOW} />);
     await userEvent.click(screen.getByRole("button", { name: "Export" }));

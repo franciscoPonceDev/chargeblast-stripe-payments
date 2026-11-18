@@ -7,6 +7,9 @@ import { tabCounts } from "@/lib/payments/query";
 import type { Payment } from "@/lib/payments/types";
 import PaymentsPage from "./page";
 
+// cookies() needs a request scope; the A/B cookie defaults to variant a.
+vi.mock("next/headers", () => ({ cookies: async () => ({ get: () => undefined }) }));
+
 (globalThis as { jest?: unknown }).jest = { advanceTimersByTime: (ms: number) => vi.advanceTimersByTime(ms) };
 
 const ok = () => new Response(JSON.stringify(data), { status: 200, headers: { "content-type": "application/json" } });

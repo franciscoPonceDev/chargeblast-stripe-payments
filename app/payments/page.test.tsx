@@ -8,6 +8,9 @@ import { __resetPaymentsCacheForTests } from "@/components/payments/PaymentsView
 import { useRouter } from "next/navigation";
 import PaymentsPage from "./page";
 
+// cookies() needs a request scope; the A/B cookie defaults to variant a.
+vi.mock("next/headers", () => ({ cookies: async () => ({ get: () => undefined }) }));
+
 // RTL's asyncWrapper only flushes fake timers when it detects Jest. Under Vitest it
 // awaits a real-looking setTimeout(0) that never fires with fake timers, so every
 // awaited user event hangs. Expose the one Jest API it calls.

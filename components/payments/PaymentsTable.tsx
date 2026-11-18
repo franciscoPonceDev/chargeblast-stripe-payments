@@ -8,6 +8,7 @@ import {
   type RowSelectionState,
   type SortingState,
 } from "@tanstack/react-table";
+import { track } from "@/lib/analytics/events";
 import type { SortState } from "@/lib/payments/query";
 import type { Payment } from "@/lib/payments/types";
 import { buildColumns } from "./columns";
@@ -111,6 +112,7 @@ function PaymentsTableImpl({
                   if (window.getSelection()?.toString()) return;
                   const el = (e.target as Element).closest(INTERACTIVE);
                   if (el && e.currentTarget.contains(el)) return;
+                  track("payment_opened", {});
                   router.push(`/payments/${row.original.id}`);
                 }}
               >

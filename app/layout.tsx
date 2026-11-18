@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Analytics } from "@/components/analytics/Analytics";
+import { Gtm } from "@/components/analytics/Gtm";
 import { allowIndexing } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -21,7 +23,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <Gtm />
+        <Analytics />
+        {children}
+      </body>
     </html>
   );
 }

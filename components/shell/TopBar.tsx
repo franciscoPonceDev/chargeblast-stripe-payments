@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, type ReactNode, type Ref } from "react";
+import { useId, useState, type ReactNode, type Ref } from "react";
 import { Icon, Popover, type IconName } from "@/components/ui";
+import { useAnalyticsConsent } from "@/lib/analytics/consent";
 
 const ICON_BTN =
   "flex size-(--size-topbar-btn) cursor-pointer items-center justify-center rounded-full text-text-primary hover:bg-bg-hover focus-visible:shadow-focus";
@@ -27,6 +28,9 @@ export interface TopBarProps {
 
 export function TopBar({ search, drawerOpen, drawerId, onToggleDrawer, toggleRef, inert }: TopBarProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [consent, setConsent] = useAnalyticsConsent();
+  const consentId = useId();
+  const consentLabelId = useId();
   return (
     <header className="flex h-(--size-topbar) items-center gap-3 px-(--space-page-x)">
       <button
@@ -97,6 +101,26 @@ export function TopBar({ search, drawerOpen, drawerId, onToggleDrawer, toggleRef
               {l}
             </button>
           ))}
+          <hr className="my-2 border-border-row" />
+          <div className="flex items-center justify-between px-2 py-1">
+            <label id={consentLabelId} htmlFor={consentId} className="flex-1 cursor-pointer text-body text-text-primary">
+              Analytics cookies
+            </label>
+            <button
+              type="button"
+              id={consentId}
+              role="switch"
+              aria-checked={consent}
+              aria-labelledby={consentLabelId}
+              onClick={() => setConsent(!consent)}
+              className={`relative h-[18px] w-[34px] shrink-0 cursor-pointer rounded-full shadow-ring focus-visible:shadow-ring-focus ${consent ? "bg-brand" : "bg-border-row"}`}
+            >
+              <span
+                aria-hidden
+                className={`absolute top-0.5 left-0.5 size-3.5 rounded-full bg-surface shadow-checkbox transition-transform motion-reduce:transition-none ${consent ? "translate-x-4" : ""}`}
+              />
+            </button>
+          </div>
           <hr className="my-2 border-border-row" />
           <p className="px-2 pb-1 text-caption text-text-muted">
             Demo rebuild for a Chargeblast assessment. Not affiliated with Stripe.

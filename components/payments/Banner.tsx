@@ -9,7 +9,7 @@ export function Banner({ onDismiss }: { onDismiss?: () => void }) {
   return (
     <div className="flex items-center gap-4 rounded-lg bg-bg-subtle p-4 text-body text-text-secondary">
       <span className="inline-flex items-center gap-1 rounded-sm bg-border-row px-1.5 text-caption leading-4 font-semibold text-text-secondary">
-        <Icon name="info" size={12} />
+        <Icon name="sparkles" size={12} />
         New
       </span>
       <span className="min-w-0 flex-1">Rule Attributes are now in Sigma and Data Pipeline for better fraud insights.</span>

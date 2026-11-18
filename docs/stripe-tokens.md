@@ -34,13 +34,7 @@ Source of truth: `app/globals.css` (`@theme`). Current values are provisional; t
 | `--size-control-sm` | `24px` | footer/row "..." button box |
 | `--size-control-md` | `28px` | 28px (button height) |
 | `--size-checkbox` | `14px` | 14px (checkbox) |
-| `--color-mark-visa` | `#1a1f71` | generic chip color, not a logo |
-| `--color-mark-mastercard` | `#eb001b` | generic chip color, not a logo |
-| `--color-mark-amex` | `#006fcf` | generic chip color, not a logo |
-| `--color-mark-discover` | `#c2410c` | generic chip color, not a logo |
-| `--color-mark-apple` | `#000000` | generic chip color, not a logo |
-| `--color-mark-google` | `#ffffff` | generic chip color, not a logo |
-| `--color-mark-link` | `#00d66f` | generic chip color, not a logo |
+| `--color-mark-link` | `#00d66f` | placeholder Link chip (no open-license Link mark exists) |
 | `--text-mark` / line-height | `8px` / `10px` | brand/wallet chip text |
 | `--color-bg-subtle` | `#f6f8fa` | #f4f7fa (banner bg) |
 | `--space-page-x` | `32px` | page horizontal padding |

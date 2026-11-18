@@ -121,7 +121,7 @@ function parseSort(v: string | undefined): SortState[] {
   return out.length ? out : DEFAULT_QUERY.sort;
 }
 
-// Invalid params fall back to defaults per field so a bad link never breaks the page.
+// Trade-off: invalid params fall back to defaults per field; a bad link never breaks the page, but fails silently.
 /** Never throws: each invalid field falls back to its default; unknown params are ignored. */
 export function parseQuery(raw: RawSearchParams): PaymentsQuery {
   const get = getter(raw);

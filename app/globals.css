@@ -8,6 +8,7 @@
   --color-border: #d4dee9;
   --color-border-row: #ecf1f6;
   --color-surface: #ffffff;
+  /* Trade-off: brand #635bff comes from the PDF reference; every other value was measured from live Stripe. */
   --color-brand: #635bff;
   --color-brand-hover: #5851e0;
   --color-on-brand: #ffffff;

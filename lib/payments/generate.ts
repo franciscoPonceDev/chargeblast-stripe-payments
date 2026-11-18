@@ -7,7 +7,7 @@ import type {
   WalletKind,
 } from './types';
 
-/** Reference "now" for mock data: 2026-11-17T18:00:00Z. */
+// Trade-off: fixed "now" (2026-11-17T18:00Z); data, "Today" filter and tests are deterministic, but never roll forward.
 export const MOCK_NOW = Date.UTC(2026, 10, 17, 18, 0, 0);
 
 const DAY = 86_400_000;

@@ -4,6 +4,7 @@ import type { KeyboardEvent } from "react";
 import clsx from "clsx";
 import type { StatusTab } from "@/lib/payments/query";
 
+// Trade-off: labels only, no counts, matching the reference; avoids count/filter drift.
 const TABS: { id: StatusTab; label: string }[] = [
   { id: "all", label: "All" },
   { id: "succeeded", label: "Succeeded" },

@@ -1,6 +1,7 @@
 import { currencyDecimals } from "./query";
 import type { Payment } from "./types";
 
+// Trade-off: illustrative fee model (2.9% + 30c; zero-decimal 3.6%, no fixed fee), not Stripe's real pricing.
 const RATE_BPS = 290; // 2.9%
 const FIXED_FEE_MINOR = 30; // 30 cents, decimal currencies only
 const ZERO_DECIMAL_RATE_BPS = 360; // zero-decimal currencies (JPY): 3.6% and no fixed fee

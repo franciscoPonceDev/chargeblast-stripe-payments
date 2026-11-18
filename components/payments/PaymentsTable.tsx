@@ -67,6 +67,7 @@ function PaymentsTableImpl({
 
   const bodyRows = table.getRowModel().rows;
 
+  // Trade-off: table scrolls horizontally beside the sidebar, as in the reference, rather than wrapping columns.
   return (
     <div className="relative overflow-x-auto">
       <table className="w-full border-collapse whitespace-nowrap text-table text-text-primary">

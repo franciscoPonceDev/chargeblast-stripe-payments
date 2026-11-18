@@ -27,6 +27,6 @@ test("status filter popover open", async ({ page }) => {
 test("row hover", async ({ page }) => {
   await openPayments(page);
   await bodyRows(page).nth(2).hover();
-  await expect(page.getByRole("group", { name: "Row actions" }).nth(2)).toHaveCSS("opacity", "1");
+  await expect(bodyRows(page).nth(2).locator("td div[aria-hidden='true']")).toHaveCSS("opacity", "1");
   await expect(page).toHaveScreenshot("row-hover.png");
 });

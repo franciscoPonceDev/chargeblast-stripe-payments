@@ -66,7 +66,7 @@ test.describe("filters", () => {
           p.id.toLowerCase().includes(t) ||
           p.customerEmail.toLowerCase().includes(t) ||
           p.customerName.toLowerCase().includes(t) ||
-          (/^\d{1,4}$/.test(t) && p.method.last4.includes(t)),
+          (/^\d{1,4}$/.test(t) && p.method.last4.endsWith(t)),
       );
       expect(hits.length).toBeGreaterThan(0);
       await openPayments(page);
@@ -122,7 +122,8 @@ test.describe("row interactions", () => {
     const row = bodyRows(page).first();
     await row.hover();
     await row.getByRole("button", { name: "Copy payment ID" }).click();
-    await expect(row.getByRole("status")).toHaveText("Copied");
+    await expect(row.getByText("Copied")).toBeVisible();
+    await expect(page.getByRole("status").filter({ hasText: "Payment ID copied" })).toHaveCount(1);
     const text = await page.evaluate(() => navigator.clipboard.readText());
     expect(text).toMatch(/^pi_[A-Za-z0-9]{24}$/);
     await expect(page).toHaveURL(/\/payments$/);
@@ -166,6 +167,30 @@ test.describe("URL state", () => {
     await expect(footer(page)).toContainText(`of ${expected} results`);
     await expect(pill(page, "Status")).toContainText("Failed");
     await expect(pill(page, "Currency")).toContainText("USD");
+  });
+
+  test("typing, filtering and sorting make no server (RSC) requests", async ({ page }) => {
+    await openPayments(page);
+    const rsc: string[] = [];
+    page.on("request", (r) => {
+      if (r.url().includes("_rsc=")) rsc.push(r.url());
+    });
+    await page.getByRole("textbox", { name: "Search" }).pressSequentially("ab", { delay: 30 });
+    await expect(page).toHaveURL((u) => u.searchParams.get("q") === "ab");
+    await page.getByRole("tab", { name: "Failed" }).click();
+    await expect(page).toHaveURL(/tab=failed/);
+    await page.getByRole("columnheader", { name: "Amount" }).getByRole("button").click();
+    await expect(page).toHaveURL(/sort=amount/);
+    await page.waitForTimeout(500);
+    expect(rsc).toEqual([]);
+  });
+
+  test("the details breadcrumb returns to the filtered list", async ({ page }) => {
+    await openPayments(page, "?tab=succeeded&size=50");
+    await bodyRows(page).first().locator("td[data-col='description']").click();
+    await expect(page).toHaveURL(/\/payments\/pi_/);
+    await page.getByRole("link", { name: "Payments" }).first().click();
+    await expect(page).toHaveURL(/tab=succeeded&size=50/);
   });
 
   test("back and forward restore filter state", async ({ page, request }) => {

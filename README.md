@@ -90,7 +90,7 @@ Request /payments?status=failed&sort=amount.desc
   -> Server Component         parseQuery(searchParams) -> applyQuery(600 rows) -> serialize ONLY the first page
   -> HTML renders the right first page (shared links look correct before any JS)
   -> after hydration          fetch /api/payments?v=<content hash>  (full dataset, CDN-cached)
-  -> client filtering         same pure applyQuery, URL kept in sync, no more server round trips
+  -> client filtering         same pure applyQuery, URL kept in sync via history.replaceState (no server round trips)
 ```
 
 - **Server-first render.** [`app/payments/page.tsx`](app/payments/page.tsx) runs the shared query engine for the URL's query and passes just that page plus tab counts to the client. This makes `/payments` dynamically rendered (see trade-offs).
@@ -134,6 +134,7 @@ Product and fidelity:
 - Search has two entry points (top bar and "More filters"), both bound to one query value.
 - "Edit columns" opens a Table-settings-style panel with column visibility; settings are a per-browser preference in `localStorage`, not URL state.
 - Sort cycle is desc, asc, default; shift-click adds a sort.
+- Amount sort compares a USD-normalised value using a small fixed FX table (illustrative rates, not live), so JPY rows do not dominate; the amount filter stays in each payment's own major units.
 - Search also matches customer name; invalid amount or date inputs degrade to "no filter"; `between` with min over max swaps.
 - Detail-page fees use an illustrative model (2.9% + 30c; zero-decimal currencies 3.6%), not Stripe's real pricing.
 
@@ -211,8 +212,8 @@ Tried and not kept: `content-visibility` on rows (no effect), lazy popover bodie
 
 | Gate | Count / threshold | Runs where |
 | --- | --- | --- |
-| Unit and component tests (Vitest) | 319 passing | CI, local |
-| Playwright e2e | 22 (19 functional + 3 axe accessibility) | CI, local |
+| Unit and component tests (Vitest) | 330 passing | CI, local |
+| Playwright e2e | 24 (21 functional + 3 axe accessibility) | CI, local |
 | Visual regression | 3 baselines (win32) | Local only |
 | Lint, typecheck, production build | must pass | CI |
 | Lighthouse CI (desktop preset, 3 runs) | Performance >= 95, Accessibility >= 95, Best practices >= 90, CLS <= 0.02, LCP <= 1.5 s; SEO >= 90 warns | CI |

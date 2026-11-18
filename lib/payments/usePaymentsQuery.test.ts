@@ -2,6 +2,7 @@ import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import data from "@/data/payments.json";
 import { MOCK_NOW } from "./generate";
+import { applyQuery, DEFAULT_QUERY, tabCounts } from "./query";
 import type { Payment } from "./types";
 import { usePaymentsQuery } from "./usePaymentsQuery";
 
@@ -57,5 +58,34 @@ describe("usePaymentsQuery", () => {
     act(() => result.current.setPage(2));
     act(() => result.current.update({}));
     expect(result.current.query.page).toBe(0);
+  });
+
+  describe("while data is null", () => {
+    const initial = { result: applyQuery(ALL, DEFAULT_QUERY, MOCK_NOW), counts: tabCounts(ALL) };
+    const setupNull = () =>
+      renderHook(({ all }: { all: Payment[] | null }) => usePaymentsQuery(all, MOCK_NOW, initial), {
+        initialProps: { all: null as Payment[] | null },
+      });
+    it("returns the initial result and counts", () => {
+      const { result } = setupNull();
+      expect(result.current.result).toBe(initial.result);
+      expect(result.current.counts).toBe(initial.counts);
+      expect(result.current.pending).toBe(false);
+    });
+    it("switches to the computed result when data arrives", () => {
+      const { result, rerender } = setupNull();
+      rerender({ all: ALL });
+      expect(result.current.result).toEqual(initial.result);
+      expect(result.current.counts.all).toBe(600);
+    });
+    it("applies an update made before data arrives once data lands", () => {
+      const { result, rerender } = setupNull();
+      act(() => result.current.update({ tab: "failed" }));
+      expect(result.current.pending).toBe(true);
+      expect(result.current.result).toBe(initial.result);
+      rerender({ all: ALL });
+      expect(result.current.pending).toBe(false);
+      expect(result.current.result).toEqual(applyQuery(ALL, { ...DEFAULT_QUERY, tab: "failed" }, MOCK_NOW));
+    });
   });
 });

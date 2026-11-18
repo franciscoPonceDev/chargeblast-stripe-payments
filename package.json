@@ -24,7 +24,8 @@
     "next": "15.5.29",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "react-svg-credit-card-payment-icons": "^6.0.4"
+    "react-svg-credit-card-payment-icons": "^6.0.4",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

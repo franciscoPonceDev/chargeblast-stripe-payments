@@ -7,7 +7,14 @@ export function SearchInput({ value, onChange }: { value: string; onChange: (v: 
   const [local, setLocal] = useState(value);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => setLocal(value), [value]);
+  const emitted = useRef(value);
+
+  useEffect(() => {
+    if (value === emitted.current) return;
+    if (timer.current) clearTimeout(timer.current);
+    emitted.current = value;
+    setLocal(value);
+  }, [value]);
   useEffect(
     () => () => {
       if (timer.current) clearTimeout(timer.current);
@@ -29,7 +36,10 @@ export function SearchInput({ value, onChange }: { value: string; onChange: (v: 
           const v = e.target.value;
           setLocal(v);
           if (timer.current) clearTimeout(timer.current);
-          timer.current = setTimeout(() => onChange(v), 200);
+          timer.current = setTimeout(() => {
+            emitted.current = v;
+            onChange(v);
+          }, 200);
         }}
         className="h-(--size-control-md) w-full rounded-md border border-border bg-surface pr-2 pl-7 text-body text-text-primary outline-transparent placeholder:text-text-muted focus-visible:ring-2 focus-visible:ring-brand-ring"
       />

@@ -24,12 +24,12 @@ function AmountForm({ value, onApply }: { value: AmountFilter; onApply: (a: Amou
   const [op, setOp] = useState<Op>(value.op === "any" ? "eq" : value.op);
   const [a, setA] = useState(value.op === "between" ? String(value.min) : value.op === "any" ? "" : String(value.value));
   const [b, setB] = useState(value.op === "between" ? String(value.max) : "");
-  const canApply = op === "between" ? Number.isFinite(num(a)) && Number.isFinite(num(b)) : Number.isFinite(num(a));
+  const ok = (n: number) => Number.isFinite(n) && n >= 0;
+  const canApply = op === "between" ? ok(num(a)) && ok(num(b)) : ok(num(a));
   return (
     <FilterForm
-      title="Filter by amount"
       canApply={canApply}
-      onApply={() => onApply(op === "between" ? { op, min: num(a), max: num(b) } : { op, value: num(a) })}
+      onApply={() => onApply(op === "between" ? { op, min: Math.min(num(a), num(b)), max: Math.max(num(a), num(b)) } : { op, value: num(a) })}
     >
       <select aria-label="Condition" value={op} onChange={(e) => setOp(e.target.value as Op)} className={inputClass}>
         {OPS.map((o) => (
@@ -40,11 +40,11 @@ function AmountForm({ value, onApply }: { value: AmountFilter; onApply: (a: Amou
       </select>
       {op === "between" ? (
         <div className="flex gap-2">
-          <input type="number" step="any" aria-label="Minimum" placeholder="Min" value={a} onChange={(e) => setA(e.target.value)} className={inputClass} />
-          <input type="number" step="any" aria-label="Maximum" placeholder="Max" value={b} onChange={(e) => setB(e.target.value)} className={inputClass} />
+          <input type="number" min={0} step="any" aria-label="Minimum" placeholder="Min" value={a} onChange={(e) => setA(e.target.value)} className={inputClass} />
+          <input type="number" min={0} step="any" aria-label="Maximum" placeholder="Max" value={b} onChange={(e) => setB(e.target.value)} className={inputClass} />
         </div>
       ) : (
-        <input type="number" step="any" aria-label="Amount" placeholder="0.00" value={a} onChange={(e) => setA(e.target.value)} className={inputClass} />
+        <input type="number" min={0} step="any" aria-label="Amount" placeholder="0.00" value={a} onChange={(e) => setA(e.target.value)} className={inputClass} />
       )}
     </FilterForm>
   );

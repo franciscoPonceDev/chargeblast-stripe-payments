@@ -25,7 +25,7 @@ export function StatusTabs({ value, onChange }: { value: StatusTab; onChange: (t
   }
 
   return (
-    <div role="tablist" aria-label="Payment status" onKeyDown={onKeyDown} className="grid grid-cols-6 gap-3">
+    <div role="tablist" aria-label="Payment status" onKeyDown={onKeyDown} className="grid grid-cols-3 gap-3 sm:grid-cols-6">
       {TABS.map((t) => {
         const selected = t.id === value;
         return (

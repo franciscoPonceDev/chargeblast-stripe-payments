@@ -5,16 +5,13 @@ import type { PaymentsQuery } from "@/lib/payments/query";
 import { AmountFilterPopover } from "./AmountFilterPopover";
 import { DateFilterPopover } from "./DateFilterPopover";
 import { FilterForm, FilterPill, inputClass } from "./FilterPill";
-import {
-  CurrencyFilterPopover,
-  MethodFilterPopover,
-  StatusFilterPopover,
-} from "./StatusFilterPopover";
+import { CurrencyFilterPopover, MethodFilterPopover } from "./MultiSelectFilter";
+import { StatusFilterPopover } from "./StatusFilterPopover";
 
 function SearchForm({ value, onApply }: { value: string; onApply: (s: string) => void }) {
   const [draft, setDraft] = useState(value);
   return (
-    <FilterForm title="Filter by more filters" canApply onApply={() => onApply(draft.trim())}>
+    <FilterForm canApply onApply={() => onApply(draft.trim())}>
       <label className="flex flex-col gap-1 text-xs text-text-secondary">
         Search
         <input
@@ -43,7 +40,7 @@ export function FilterBar({
       <CurrencyFilterPopover value={query.currencies} onChange={(currencies) => onChange({ currencies })} />
       <StatusFilterPopover value={query.statuses} onChange={(statuses) => onChange({ statuses })} />
       <MethodFilterPopover value={query.methods} onChange={(methods) => onChange({ methods })} />
-      <FilterPill label="More filters" summary={query.search || null} onClear={() => onChange({ search: "" })}>
+      <FilterPill label="More filters" title="Search payments" summary={query.search || null} onClear={() => onChange({ search: "" })}>
         {(close) => (
           <SearchForm
             value={query.search}

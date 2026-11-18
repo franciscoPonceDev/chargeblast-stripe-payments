@@ -47,10 +47,12 @@ function DateForm({ value, onApply }: { value: DateFilter; onApply: (d: DateFilt
   const canApply = preset !== null && (preset !== "custom" || !!from || !!to);
   return (
     <FilterForm
-      title="Filter by date and time"
       canApply={canApply}
       onApply={() => {
-        if (preset === "custom") onApply({ preset, from: from || null, to: to || null });
+        if (preset === "custom") {
+          const [lo, hi] = from && to && from > to ? [to, from] : [from, to];
+          onApply({ preset, from: lo || null, to: hi || null });
+        }
         else if (preset) onApply({ preset });
       }}
     >

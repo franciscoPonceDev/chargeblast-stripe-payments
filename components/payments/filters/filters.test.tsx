@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
+import { useState } from "react";
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { DEFAULT_QUERY, type PaymentsQuery } from "@/lib/payments/query";
@@ -125,6 +126,73 @@ describe("FilterBar", () => {
     expect(onChange).toHaveBeenCalledWith({ search: "pi_123" });
   });
 
+  it("more filters popover is titled Search payments and labelled by it", async () => {
+    setup();
+    await userEvent.click(screen.getByRole("button", { name: "More filters" }));
+    expect(screen.getByRole("heading", { level: 2, name: "Search payments" })).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Search payments" })).toBeInTheDocument();
+  });
+
+  it("keeps focus on the pill trigger after Apply and after Clear", async () => {
+    function Harness() {
+      const [q, setQ] = useState<PaymentsQuery>(DEFAULT_QUERY);
+      return <FilterBar query={q} onChange={(p) => setQ((c) => ({ ...c, ...p }))} />;
+    }
+    render(<Harness />);
+    await userEvent.click(screen.getByRole("button", { name: "Status" }));
+    await userEvent.click(screen.getByRole("checkbox", { name: "Failed" }));
+    await userEvent.click(screen.getByRole("button", { name: "Apply" }));
+    const trigger = screen.getByRole("button", { name: /^Status/ });
+    expect(trigger).toHaveTextContent("Failed");
+    expect(document.activeElement).toBe(trigger);
+    // reopening shows the committed value
+    await userEvent.click(trigger);
+    expect(screen.getByRole("checkbox", { name: "Failed" })).toHaveAttribute("aria-checked", "true");
+    await userEvent.keyboard("{Escape}");
+    await userEvent.click(screen.getByRole("button", { name: "Clear Status filter" }));
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: "Status" }));
+  });
+
+  it("amount rejects negatives and normalises between", async () => {
+    const onChange = setup();
+    await userEvent.click(screen.getByRole("button", { name: "Amount" }));
+    await userEvent.type(screen.getByLabelText("Amount"), "-5");
+    expect(screen.getByRole("button", { name: "Apply" })).toBeDisabled();
+    await userEvent.clear(screen.getByLabelText("Amount"));
+    await userEvent.selectOptions(screen.getByRole("combobox"), "is between");
+    await userEvent.type(screen.getByLabelText("Minimum"), "20");
+    await userEvent.type(screen.getByLabelText("Maximum"), "10");
+    await userEvent.click(screen.getByRole("button", { name: "Apply" }));
+    expect(onChange).toHaveBeenCalledWith({ amount: { op: "between", min: 10, max: 20 } });
+  });
+
+  it("custom date swaps from > to, and needs at least one side", async () => {
+    const onChange = setup();
+    await userEvent.click(screen.getByRole("button", { name: "Date and time" }));
+    await userEvent.click(screen.getByRole("radio", { name: "Custom" }));
+    expect(screen.getByRole("button", { name: "Apply" })).toBeDisabled();
+    await userEvent.type(screen.getByLabelText("From"), "2026-11-10");
+    await userEvent.type(screen.getByLabelText("To"), "2026-11-01");
+    await userEvent.click(screen.getByRole("button", { name: "Apply" }));
+    expect(onChange).toHaveBeenCalledWith({ date: { preset: "custom", from: "2026-11-01", to: "2026-11-10" } });
+  });
+
+  it("Enter submits the form", async () => {
+    const onChange = setup();
+    await userEvent.click(screen.getByRole("button", { name: "Amount" }));
+    await userEvent.type(screen.getByLabelText("Amount"), "5{Enter}");
+    expect(onChange).toHaveBeenCalledWith({ amount: { op: "eq", value: 5 } });
+  });
+
+  it.each([
+    [{ preset: "today" }, "Today"],
+    [{ preset: "7d" }, "Last 7 days"],
+    [{ preset: "30d" }, "Last 30 days"],
+  ] as const)("date summary %o", (date, text) => {
+    setup({ date: date as PaymentsQuery["date"] });
+    expect(screen.getByText(text)).toBeInTheDocument();
+  });
+
   it("more filters set state", async () => {
     const onChange = setup({ search: "bob" });
     expect(screen.getByText("bob")).toBeInTheDocument();
@@ -148,6 +216,20 @@ describe("SearchInput", () => {
     });
     expect(onChange).toHaveBeenCalledTimes(1);
     expect(onChange).toHaveBeenCalledWith("abc");
+  });
+
+  it("external change cancels a pending debounce", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const onChange = vi.fn();
+    const { rerender } = render(<SearchInput value="" onChange={onChange} />);
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    await user.type(screen.getByPlaceholderText("Search"), "x");
+    rerender(<SearchInput value="reset" onChange={onChange} />);
+    act(() => {
+      vi.advanceTimersByTime(500);
+    });
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getByPlaceholderText("Search")).toHaveValue("reset");
   });
 
   it("syncs when value changes externally and clears timer on unmount", async () => {

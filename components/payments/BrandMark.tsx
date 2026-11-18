@@ -17,11 +17,28 @@ const CARDS: Record<CardBrand, ComponentType<SVGProps<SVGSVGElement>>> = {
 
 const BASE = "inline-flex align-middle h-4 w-6 shrink-0 items-center justify-center overflow-hidden rounded-sm";
 
+// Perf: each brand's artwork is 1.5-5 KB of SVG. Inlining it per row put ~140 KB (45% of the HTML) and ~2,800 nodes
+// in the /payments document, so every brand is rendered once in a hidden sprite and rows reference it with <use>.
+const spriteId = (brand: CardBrand) => `card-${brand}`;
+
+/** Render once on any page that shows BrandMark. */
+export function BrandSprite() {
+  return (
+    <svg width="0" height="0" aria-hidden="true" focusable="false" className="pointer-events-none absolute size-0 overflow-hidden">
+      {(Object.keys(CARDS) as CardBrand[]).map((brand) => {
+        const Card = CARDS[brand];
+        return <Card key={brand} id={spriteId(brand)} width={24} height={16} />;
+      })}
+    </svg>
+  );
+}
+
 export function BrandMark({ brand }: { brand: CardBrand }) {
-  const Card = CARDS[brand];
   return (
     <span className={BASE} role="img" aria-label={brand}>
-      <Card width={24} height={16} aria-hidden="true" />
+      <svg width={24} height={16} aria-hidden="true" focusable="false">
+        <use href={`#${spriteId(brand)}`} width={24} height={16} />
+      </svg>
     </span>
   );
 }

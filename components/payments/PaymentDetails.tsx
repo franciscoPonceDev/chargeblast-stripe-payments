@@ -6,6 +6,7 @@ import { feeFor, metadataFor, netFor, statementDescriptor } from "@/lib/payments
 import { STATUS_LABELS } from "@/lib/payments/query";
 import { buildTimeline } from "@/lib/payments/timeline";
 import type { Payment, PaymentMethod } from "@/lib/payments/types";
+import { BrandSprite } from "./BrandMark";
 import { CopyIdButton } from "./CopyIdButton";
 import { PaymentMethodCell } from "./PaymentMethodCell";
 import { StatusBadge } from "./StatusBadge";
@@ -42,6 +43,7 @@ export function PaymentDetails({ payment: p, now }: { payment: Payment; now: num
   const metadata = metadataFor(p.id);
   return (
     <div className="max-w-4xl">
+      <BrandSprite />
       <nav aria-label="Breadcrumb" className="mt-(--space-page-top)">
         <Link
           href="/payments"

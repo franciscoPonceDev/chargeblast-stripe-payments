@@ -11,6 +11,7 @@ import {
 import { track } from "@/lib/analytics/events";
 import type { SortState } from "@/lib/payments/query";
 import type { Payment } from "@/lib/payments/types";
+import { BrandSprite } from "./BrandMark";
 import { buildColumns } from "./columns";
 
 function padFor(id: string) {
@@ -78,6 +79,7 @@ function PaymentsTableImpl({
   // Trade-off: table scrolls horizontally beside the sidebar, as in the reference, rather than wrapping columns.
   return (
     <div className="relative overflow-x-auto">
+      <BrandSprite />
       <table className="w-full border-collapse whitespace-nowrap text-table text-text-primary">
         <caption className="sr-only">Payments</caption>
         <thead>

@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui";
+import { formatCount } from "@/lib/format";
 import type { PageSize, QueryResult } from "@/lib/payments/query";
 import { PageSizeSelect } from "./PageSizeSelect";
 
-const fmt = (n: number) => n.toLocaleString("en-US");
+const fmt = formatCount;
 
 export function TableFooter({
   result,

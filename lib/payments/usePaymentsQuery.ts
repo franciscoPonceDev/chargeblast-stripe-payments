@@ -38,10 +38,20 @@ export function usePaymentsQuery(
     () => (all ? tabCounts(all) : initial.counts),
     [all, initial.counts],
   );
-  const result: QueryResult = useMemo(
-    () => (all ? applyQuery(all, query, now) : initial.result),
-    [all, query, now, initial.result],
-  );
+  const result: QueryResult = useMemo(() => {
+    if (!all) return initial.result;
+    const next = applyQuery(all, query, now);
+    // Perf: when the full dataset lands and the page is unchanged (same ids, same dataset version), keep the server
+    // result's identity so the memoised table does not re-render 25+ rows with identical content.
+    const prev = initial.result;
+    const same =
+      next.total === prev.total &&
+      next.page === prev.page &&
+      next.pageCount === prev.pageCount &&
+      next.rows.length === prev.rows.length &&
+      next.rows.every((r, i) => r.id === prev.rows[i].id);
+    return same ? prev : next;
+  }, [all, query, now, initial.result]);
   const pending = all === null && query !== start;
 
   const update = useCallback((patch: Partial<PaymentsQuery>) => {

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   currencyCode,
+  formatCount,
   formatAmount,
   formatDateTime,
   formatRelative,
@@ -21,6 +22,26 @@ describe('formatAmount', () => {
   });
 });
 
+describe('formatAmount fast path vs Intl', () => {
+  const CURRENCIES = ['usd', 'gbp', 'eur', 'brl', 'cad', 'jpy'] as const;
+  const AMOUNTS = [0, 1, 5, 9, 10, 99, 100, 101, 999, 1000, 99999, 100000, 123456, 99999999, 123456789, 5_000_000_000];
+  const intl = (amount: number, c: (typeof CURRENCIES)[number]) => {
+    const value = amount / 10 ** (c === 'jpy' ? 0 : 2);
+    const out = new Intl.NumberFormat('en-US', { style: 'currency', currency: c.toUpperCase(), currencyDisplay: 'narrowSymbol' }).format(value);
+    const m = out.match(/^(\D+)(\d.*)$/);
+    return m && m[1].length > 1 ? `${m[1]} ${m[2]}` : out;
+  };
+  it('matches Intl.NumberFormat', () => {
+    for (const c of CURRENCIES) for (const a of AMOUNTS) expect(formatAmount(a, c), `${a} ${c}`).toBe(intl(a, c));
+  });
+});
+
+describe('formatCount', () => {
+  it('matches toLocaleString for whole numbers', () => {
+    for (const n of [0, 7, 25, 999, 1000, 1234, 12345, 606, 1234567]) expect(formatCount(n)).toBe(n.toLocaleString('en-US'));
+  });
+});
+
 describe('currencyCode', () => {
   it('uppercases', () => {
     expect(currencyCode('brl')).toBe('BRL');
@@ -33,6 +54,18 @@ describe('formatDateTime', () => {
   });
   it('includes year in another year', () => {
     expect(formatDateTime(Date.UTC(2025, 7, 16, 17, 3), NOW)).toBe('Aug 16, 2025, 5:03 PM');
+  });
+});
+
+describe('formatDateTime fast path vs date-fns', () => {
+  it('matches the date-fns UTC output across year boundaries', async () => {
+    const { format } = await import('date-fns');
+    const { appTz } = await import('@/lib/time');
+    const times = [Date.UTC(2026, 0, 1, 0, 0), Date.UTC(2026, 11, 31, 23, 59), Date.UTC(2025, 5, 9, 12, 0), Date.UTC(2026, 2, 8, 0, 5), Date.UTC(2027, 1, 28, 11, 59)];
+    for (const t of times) {
+      const same = new Date(t).getUTCFullYear() === new Date(NOW).getUTCFullYear();
+      expect(formatDateTime(t, NOW)).toBe(format(t, same ? 'MMM d, h:mm a' : 'MMM d, yyyy, h:mm a', { in: appTz }));
+    }
   });
 });
 

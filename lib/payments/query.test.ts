@@ -99,6 +99,11 @@ describe('filterPayments', () => {
     it('short digits match last4', () => {
       expect(ids(filterPayments(rows, q({ search: '42' }), NOW))).toEqual([k.id]);
     });
+    it('digit-only queries of up to 4 chars match the end of last4', () => {
+      expect(ids(filterPayments(rows, q({ search: '4242' }), NOW))).toEqual([k.id]);
+      expect(ids(filterPayments(rows, q({ search: '242' }), NOW))).toEqual([k.id]);
+      expect(ids(filterPayments(rows, q({ search: '424' }), NOW))).toEqual([]);
+    });
     it('customer name', () => {
       expect(ids(filterPayments(rows, q({ search: 'danvers' }), NOW))).toEqual([named.id]);
     });
@@ -203,12 +208,14 @@ describe('filterPayments', () => {
 });
 
 describe('sortPayments', () => {
-  it('amount by major units', () => {
-    const jpy = make({ amount: 500, currency: 'jpy' }); // 500
+  it('amount by USD-normalised value, not face value', () => {
+    const jpy = make({ amount: 500, currency: 'jpy' }); // ~3.35 USD
     const usd = make({ amount: 10000 }); // 100
     const usd2 = make({ amount: 99900 }); // 999
-    expect(ids(sortPayments([jpy, usd2, usd], [{ id: 'amount', desc: false }]))).toEqual([usd.id, jpy.id, usd2.id]);
-    expect(ids(sortPayments([jpy, usd2, usd], [{ id: 'amount', desc: true }]))).toEqual([usd2.id, jpy.id, usd.id]);
+    const gbp = make({ amount: 10000, currency: 'gbp' }); // ~127 USD
+    expect(ids(sortPayments([jpy, usd2, usd], [{ id: 'amount', desc: false }]))).toEqual([jpy.id, usd.id, usd2.id]);
+    expect(ids(sortPayments([jpy, usd2, usd], [{ id: 'amount', desc: true }]))).toEqual([usd2.id, usd.id, jpy.id]);
+    expect(ids(sortPayments([gbp, usd, usd2], [{ id: 'amount', desc: false }]))).toEqual([usd.id, gbp.id, usd2.id]);
   });
   it('status alphabetical by label', () => {
     const s = make({ status: 'succeeded' });

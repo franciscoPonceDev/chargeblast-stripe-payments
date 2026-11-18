@@ -1,5 +1,6 @@
 import {
   DEFAULT_QUERY,
+  MAX_AMOUNT,
   STATUS_LABELS,
   type AmountFilter,
   type DateFilter,
@@ -23,6 +24,8 @@ const MAX_PAGE = 1_000_000;
 
 export type RawSearchParams = URLSearchParams | Record<string, string | string[] | undefined>;
 
+/** Fixed-decimal (max 2) so String() never yields exponent notation; clamped to the accepted range. */
+const amountParam = (n: number) => String(Number(Math.min(Math.max(n, 0), MAX_AMOUNT).toFixed(2)));
 const sortToString = (sort: SortState[]) => sort.map((s) => `${s.id}.${s.desc ? 'desc' : 'asc'}`).join(',');
 const DEFAULT_SORT_STR = sortToString(DEFAULT_QUERY.sort);
 
@@ -42,9 +45,9 @@ export function serializeQuery(q: PaymentsQuery): URLSearchParams {
   }
   const a = q.amount;
   if (a.op === 'between') {
-    if (Number.isFinite(a.min) && Number.isFinite(a.max)) sp.set('amount', `between:${a.min}-${a.max}`);
+    if (Number.isFinite(a.min) && Number.isFinite(a.max)) sp.set('amount', `between:${amountParam(a.min)}-${amountParam(a.max)}`);
   } else if (a.op !== 'any' && Number.isFinite(a.value)) {
-    sp.set('amount', `${a.op}:${a.value}`);
+    sp.set('amount', `${a.op}:${amountParam(a.value)}`);
   }
   const sort = sortToString(q.sort);
   if (sort && sort !== DEFAULT_SORT_STR) sp.set('sort', sort);
@@ -104,13 +107,13 @@ function parseAmount(v: string | undefined): AmountFilter {
   if (!v) return DEFAULT_QUERY.amount;
   const s = SIMPLE_AMOUNT.exec(v);
   if (s) {
-    const value = Number(s[2]);
+    const value = Math.min(Number(s[2]), MAX_AMOUNT);
     if (Number.isFinite(value)) return { op: s[1] as 'eq' | 'gt' | 'lt', value };
   }
   const b = BETWEEN_AMOUNT.exec(v);
   if (b) {
-    const min = Number(b[1]);
-    const max = Number(b[2]);
+    const min = Math.min(Number(b[1]), MAX_AMOUNT);
+    const max = Math.min(Number(b[2]), MAX_AMOUNT);
     if (Number.isFinite(min) && Number.isFinite(max)) return { op: 'between', min: Math.min(min, max), max: Math.max(min, max) };
   }
   return DEFAULT_QUERY.amount;

@@ -36,6 +36,19 @@ describe("payments URL state", () => {
       expect(p(serializeQuery({ ...DEFAULT_QUERY, date: { preset } }).toString()).date).toEqual({ preset });
     }
   });
+  it("serializes amounts as plain fixed decimals and round-trips them", () => {
+    for (const [value, expected] of [[1e-7, "0"], [1e21, "1000000000"], [0.1 + 0.2, "0.3"], [1234.5, "1234.5"]] as const) {
+      const sp = serializeQuery({ ...DEFAULT_QUERY, amount: { op: "gt", value } });
+      expect(sp.get("amount")).toBe(`gt:${expected}`);
+      expect(p(sp.toString()).amount).toEqual({ op: "gt", value: Number(expected) });
+    }
+    const between = serializeQuery({ ...DEFAULT_QUERY, amount: { op: "between", min: 1e-9, max: 1e30 } });
+    expect(between.get("amount")).toBe("between:0-1000000000");
+    expect(p(between.toString()).amount).toEqual({ op: "between", min: 0, max: 1_000_000_000 });
+  });
+  it("clamps absurd amounts when parsing", () => {
+    expect(p("amount=gt:99999999999999999999999").amount).toEqual({ op: "gt", value: 1_000_000_000 });
+  });
   it("omits defaults", () => {
     expect(serializeQuery(DEFAULT_QUERY).toString()).toBe("");
     expect(p("")).toEqual(DEFAULT_QUERY);

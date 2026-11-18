@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { AmountFilter } from "@/lib/payments/query";
+import { MAX_AMOUNT, type AmountFilter } from "@/lib/payments/query";
 import { FilterForm, FilterPill, inputClass } from "./FilterPill";
 
 type Op = "eq" | "between" | "gt" | "lt";
@@ -18,7 +18,7 @@ export function amountSummary(f: AmountFilter): string | null {
   return f.op === "between" ? `${label} ${f.min} and ${f.max}` : `${label} ${f.value}`;
 }
 
-const num = (s: string) => (s.trim() === "" ? NaN : Number(s));
+const num = (s: string) => (s.trim() === "" ? NaN : Math.min(Number(s), MAX_AMOUNT));
 
 function AmountForm({ value, onApply }: { value: AmountFilter; onApply: (a: AmountFilter) => void }) {
   const [op, setOp] = useState<Op>(value.op === "any" ? "eq" : value.op);
@@ -40,11 +40,11 @@ function AmountForm({ value, onApply }: { value: AmountFilter; onApply: (a: Amou
       </select>
       {op === "between" ? (
         <div className="flex gap-2">
-          <input type="number" min={0} step="any" aria-label="Minimum" placeholder="Min" value={a} onChange={(e) => setA(e.target.value)} className={inputClass} />
-          <input type="number" min={0} step="any" aria-label="Maximum" placeholder="Max" value={b} onChange={(e) => setB(e.target.value)} className={inputClass} />
+          <input type="number" min={0} max={MAX_AMOUNT} step="any" aria-label="Minimum" placeholder="Min" value={a} onChange={(e) => setA(e.target.value)} className={inputClass} />
+          <input type="number" min={0} max={MAX_AMOUNT} step="any" aria-label="Maximum" placeholder="Max" value={b} onChange={(e) => setB(e.target.value)} className={inputClass} />
         </div>
       ) : (
-        <input type="number" min={0} step="any" aria-label="Amount" placeholder="0.00" value={a} onChange={(e) => setA(e.target.value)} className={inputClass} />
+        <input type="number" min={0} max={MAX_AMOUNT} step="any" aria-label="Amount" placeholder="0.00" value={a} onChange={(e) => setA(e.target.value)} className={inputClass} />
       )}
     </FilterForm>
   );

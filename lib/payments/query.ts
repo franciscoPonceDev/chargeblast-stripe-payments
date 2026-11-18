@@ -67,6 +67,16 @@ function majorAmount(p: Payment): number {
   return p.amount / 10 ** currencyDecimals(p.currency);
 }
 
+/** Largest amount the filter UI and URL accept (major units). */
+export const MAX_AMOUNT = 1_000_000_000;
+
+// Trade-off: illustrative fixed USD rates (not live FX) so amount sort compares across currencies; the amount filter stays in each payment's own major units.
+const USD_PER_MAJOR: Record<Currency, number> = { usd: 1, gbp: 1.27, eur: 1.08, brl: 0.18, cad: 0.73, jpy: 0.0067 };
+
+function usdAmount(p: Payment): number {
+  return majorAmount(p) * USD_PER_MAJOR[p.currency];
+}
+
 function matchesTab(p: Payment, tab: StatusTab): boolean {
   switch (tab) {
     case 'all':
@@ -86,7 +96,7 @@ function matchesSearch(p: Payment, raw: string): boolean {
   if (p.id.toLowerCase().includes(s)) return true;
   if (p.customerEmail.toLowerCase().includes(s)) return true;
   if (p.customerName.toLowerCase().includes(s)) return true;
-  if (/^\d{1,4}$/.test(s) && p.method.last4.includes(s)) return true;
+  if (/^\d{1,4}$/.test(s) && p.method.last4.endsWith(s)) return true;
   return false;
 }
 
@@ -154,7 +164,7 @@ function compareBy(key: SortKey, a: Payment, b: Payment): number {
     case 'created':
       return cmp(a.created, b.created);
     case 'amount':
-      return cmp(majorAmount(a), majorAmount(b));
+      return cmp(usdAmount(a), usdAmount(b));
     case 'status':
       return cmp(STATUS_LABELS[a.status], STATUS_LABELS[b.status]);
   }

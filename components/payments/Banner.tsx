@@ -20,7 +20,7 @@ export function Banner({ variant = "a", onDismiss }: { variant?: Variant; onDism
       <button
         type="button"
         onClick={() => track("banner_cta_clicked", { variant })}
-        className="ml-8 cursor-pointer rounded-sm text-brand hover:text-brand-hover focus-visible:shadow-focus"
+        className="ml-8 cursor-pointer rounded-sm text-brand-text hover:text-brand-hover focus-visible:shadow-focus"
       >
         {BANNER_CTA[variant]}
       </button>

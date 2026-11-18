@@ -11,8 +11,8 @@ import { parseQuery } from "@/lib/payments/url";
 export const metadata: Metadata = {
   title: "Transactions",
   alternates: { canonical: "/payments" },
-  openGraph: { type: "website", siteName: SITE_NAME, locale: "en_US", title: "Transactions", url: "/payments", images: ["/opengraph-image"] },
-  twitter: { card: "summary_large_image", title: "Transactions", images: ["/opengraph-image"] },
+  openGraph: { type: "website", siteName: SITE_NAME, locale: "en_US", title: "Transactions", url: "/payments" },
+  twitter: { card: "summary_large_image", title: "Transactions" },
 };
 
 export default async function PaymentsPage({

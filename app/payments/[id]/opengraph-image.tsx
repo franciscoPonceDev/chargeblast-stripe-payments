@@ -16,9 +16,10 @@ export function generateStaticParams() {
 export default async function Image({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const p = ALL_PAYMENTS.find((x) => x.id === id);
-  const amount = p ? formatAmount(p.amount, p.currency) : '';
-  const code = p ? currencyCode(p.currency) : '';
-  const status = p ? STATUS_LABELS[p.status] : 'Not found';
+  if (!p) return new Response(null, { status: 404 });
+  const amount = formatAmount(p.amount, p.currency);
+  const code = currencyCode(p.currency);
+  const status = STATUS_LABELS[p.status];
   return new ImageResponse(
     (
       <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', background: BRAND_COLOR, color: '#fff', fontFamily: 'sans-serif', padding: 80 }}>

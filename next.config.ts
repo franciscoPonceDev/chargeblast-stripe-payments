@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 import { allowIndexing } from "./lib/seo";
 
 const nextConfig: NextConfig = {
-  // Trade-off: block on generateMetadata for every client so title/description land in <head> (the dynamic /payments route otherwise streams them into <body>).
+  // Trade-off: metadata in <head> for every UA (Lighthouse/non-JS crawlers); fine while metadata is static — revisit if it gains I/O.
   htmlLimitedBots: /.*/,
   experimental: {
     optimizePackageImports: ["lucide-react"],

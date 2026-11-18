@@ -7,7 +7,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   if (!allowIndexing) return [];
   const base = getSiteUrl();
   return [
-    { url: `${base}/`, changeFrequency: 'daily', priority: 1 },
     { url: `${base}/payments`, changeFrequency: 'daily', priority: 0.8 },
     ...ALL_PAYMENTS.map((p) => ({
       url: `${base}/payments/${p.id}`,

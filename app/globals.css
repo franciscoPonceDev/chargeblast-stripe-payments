@@ -11,6 +11,8 @@
   /* Trade-off: brand #635bff comes from the PDF reference; every other value was measured from live Stripe. */
   --color-brand: #635bff;
   --color-brand-hover: #5851e0;
+  /* Trade-off: brand text on subtle backgrounds is darkened to pass 4.5:1 (#635bff is 4.37:1 on #f4f7fa); fills keep the reference brand. */
+  --color-brand-text: #5b53f2;
   --color-on-brand: #ffffff;
   --color-control: #273951;
   --color-bg-hover: #f4f7fa;

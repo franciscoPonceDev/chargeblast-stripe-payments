@@ -81,7 +81,6 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       <div className="flex h-(--size-topbar) shrink-0 items-center px-(--space-sidebar-x)">
         <button
           type="button"
-          aria-label="Switch account, Acme Inc."
           className="-mx-1.5 flex h-9 w-full cursor-pointer items-center gap-2 rounded-lg px-1.5 hover:bg-bg-hover focus-visible:shadow-focus"
         >
           <span

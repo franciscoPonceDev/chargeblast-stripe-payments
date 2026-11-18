@@ -37,11 +37,11 @@ Source of truth: `app/globals.css` (`@theme`). Current values are provisional; t
 | `--color-mark-link` | `#00d66f` | placeholder Link chip (no open-license Link mark exists) |
 | `--text-mark` / line-height | `8px` / `10px` | brand/wallet chip text |
 | `--color-bg-subtle` | `#f6f8fa` | #f4f7fa (banner bg) |
-| `--space-page-x` | `32px` | page horizontal padding |
+| `--space-page-x` | `40px` | page horizontal padding |
 | `--space-page-top` | `24px` | 16px (top bar bottom to title top) |
 | `--size-topbar` | `56px` | 60px (top bar zone (search row 36px)) |
 | `--text-h1` / line-height | `28px` / `36px` | page title |
-| `--size-search-max` | `480px` | top bar search max width |
+| `--size-search-max` | `360px` | top bar search max width |
 | `--space-section` | `16px` | vertical gap between page sections |
 | `--space-page-bottom` | `24px` | page bottom padding |
 | `--text-caption` / line-height | `12px` / `16px` | small labels (chips) |
@@ -56,3 +56,14 @@ Source of truth: `app/globals.css` (`@theme`). Current values are provisional; t
 | `--shadow-focus` | `0 0 0 4px rgba(1,150,237,.36)` | focus ring everywhere (new, global `:focus-visible`) |
 | `--font-sans` | system stack | measured root stack (new) |
 | `--font-mono` | `"Source Code Pro", Menlo, Monaco, monospace` | ID chip (new) |
+| `--size-sidebar` | `240px` | 240px (left sidebar width) |
+| `--size-nav-item` | `30px` | 30px (sidebar item height) |
+| `--space-sidebar-x` | `20px` | 20px (sidebar content padding) |
+| `--space-sidebar-gap` | `28px` | 28px (gap between nav sections) |
+| `--color-sidebar-border` | `#ecf1f6` | #ecf1f6 (sidebar right divider) |
+| `--color-sidebar-active-bg` | `#f4f7fa` | subtle active nav bg (PDF shows tint) |
+| `--color-sidebar-avatar-bg` | `#635bff` | brand tile for demo account avatar |
+| `--color-scrim` | `rgb(26 44 68 / 0.4)` | mobile drawer backdrop |
+| `--size-topbar-btn` | `28px` | top bar icon button |
+| `--size-create-btn` | `24px` | round brand "+" button |
+| `--color-mark-apple` / `-fg` | `#000` / `#fff` | Apple Pay chip (black, white glyph) |

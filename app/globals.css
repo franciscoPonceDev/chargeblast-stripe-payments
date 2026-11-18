@@ -26,6 +26,8 @@
   --color-badge-warning-fg: #a82c00;
 
   --color-mark-link: #00d66f;
+  --color-mark-apple: #000000;
+  --color-mark-apple-fg: #ffffff;
 
   --radius-sm: 4px;
   --radius-md: 6px;
@@ -59,12 +61,22 @@
   --size-checkbox: 14px;
 
   --color-bg-subtle: #f4f7fa;
-  --space-page-x: 32px;
+  --space-page-x: 40px;
   --space-page-top: 16px;
   --size-topbar: 60px;
-  --size-search-max: 480px;
+  --size-search-max: 360px;
   --space-section: 16px;
   --space-page-bottom: 24px;
+  --size-sidebar: 240px;
+  --size-nav-item: 30px;
+  --space-sidebar-x: 20px;
+  --space-sidebar-gap: 28px;
+  --color-sidebar-border: #ecf1f6;
+  --color-sidebar-active-bg: #f4f7fa;
+  --color-sidebar-avatar-bg: #635bff;
+  --color-scrim: rgb(26 44 68 / 0.4);
+  --size-topbar-btn: 28px;
+  --size-create-btn: 24px;
   --text-caption: 12px;
   --text-caption--line-height: 16px;
   --text-h1: 28px;

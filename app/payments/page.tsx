@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useRef } from "react";
+import { AppShell } from "@/components/shell/AppShell";
 import { Banner } from "@/components/payments/Banner";
 import { FilterBar } from "@/components/payments/filters/FilterBar";
 import { SearchInput } from "@/components/payments/filters/SearchInput";
@@ -24,12 +25,7 @@ export default function PaymentsPage() {
     tabsRef.current?.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]')?.focus();
   }, []);
   return (
-    <main className="px-(--space-page-x) pb-(--space-page-bottom)">
-      <div className="flex h-(--size-topbar) items-center">
-        <div className="w-full max-w-(--size-search-max)">
-          <SearchInput value={query.search} onChange={(search) => update({ search })} />
-        </div>
-      </div>
+    <AppShell search={<SearchInput value={query.search} onChange={(search) => update({ search })} />}>
       <PageHeader />
       <div className="mt-(--space-section)">
         <Banner onDismiss={focusTabs} />
@@ -53,6 +49,6 @@ export default function PaymentsPage() {
         onPageSizeChange={(pageSize) => update({ pageSize })}
         onPageChange={setPage}
       />
-    </main>
+    </AppShell>
   );
 }

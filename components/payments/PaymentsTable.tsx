@@ -64,7 +64,7 @@ export function PaymentsTable({
   const bodyRows = table.getRowModel().rows;
 
   return (
-    <div className="overflow-x-auto">
+    <div className="relative overflow-x-auto">
       <table className="w-full border-collapse whitespace-nowrap text-table text-text-primary">
         <thead>
           {table.getHeaderGroups().map((hg) => (

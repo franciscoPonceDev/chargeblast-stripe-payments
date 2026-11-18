@@ -13,9 +13,7 @@ import PaymentsPage from "./page";
 // awaited user event hangs. Expose the one Jest API it calls.
 (globalThis as { jest?: unknown }).jest = { advanceTimersByTime: (ms: number) => vi.advanceTimersByTime(ms) };
 
-// Each test mounts the whole shell plus a 25-row table from 600 mock rows in jsdom;
-// that costs 1-5s per test even on an idle machine, i.e. right at Vitest's 5s default,
-// so CPU contention in full-suite runs tipped it over. Budget it explicitly.
+// Trade-off: 30s timeout; heavy full-page jsdom integration tests (1-5s each), real-browser e2e covers the flows.
 describe("PaymentsPage", { timeout: 30_000 }, () => {
   beforeEach(() => {
     vi.useFakeTimers();

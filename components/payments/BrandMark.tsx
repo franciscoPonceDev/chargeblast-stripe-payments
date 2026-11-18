@@ -36,7 +36,7 @@ function Glyph({ path, className }: { path: string; className?: string }) {
 
 export function WalletMark({ wallet }: { wallet: WalletKind }) {
   if (wallet === "link") {
-    // No open-license Link mark exists; keep a neutral brand-colored chip.
+    // Trade-off: Link has no open-license mark, so a neutral chip stands in; not pixel-faithful.
     return (
       <span className={`${BASE} bg-mark-link text-text-primary text-mark font-bold leading-none`} role="img" aria-label="Link">
         ›

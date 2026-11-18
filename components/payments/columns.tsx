@@ -58,6 +58,7 @@ export function buildColumns({ sort, onSortChange, now }: ColumnCtx): ColumnDef<
     },
     {
       id: "status",
+      // Trade-off: visible "Status" header so the column is sortable; Stripe leaves it blank.
       header: () => <SortHeader id="status" label="Status" sort={sort} onSortChange={onSortChange} />,
       cell: ({ row }) => <StatusBadge status={row.original.status} />,
     },
@@ -97,6 +98,7 @@ export function buildColumns({ sort, onSortChange, now }: ColumnCtx): ColumnDef<
     },
     {
       id: "paymentId",
+      // Trade-off: required Payment ID sits last to keep the PDF's column positions.
       header: "Payment ID",
       cell: ({ row }) => (
         <span className="inline-flex h-(--size-chip) items-center gap-1 rounded-md border border-border-row bg-bg-hover py-0.5 pr-1 pl-1.5 font-mono text-caption text-text-secondary">

@@ -34,6 +34,7 @@ export function __resetPaymentsCacheForTests() {
   cachedAll = null;
 }
 
+// Trade-off: full dataset fetched after hydration; small first load and instant client filtering, at the cost of a late fetch.
 function loadAll(version: string): Promise<Payment[]> {
   if (cachedAll) return Promise.resolve(cachedAll);
   if (!inflight) {

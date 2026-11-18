@@ -40,6 +40,7 @@ export function FilterBar({
       <CurrencyFilterPopover value={query.currencies} onChange={(currencies) => onChange({ currencies })} />
       <StatusFilterPopover value={query.statuses} onChange={(statuses) => onChange({ statuses })} />
       <MethodFilterPopover value={query.methods} onChange={(methods) => onChange({ methods })} />
+      {/* Trade-off: search lives in the top bar and More filters, both bound to one query value; two entry points. */}
       <FilterPill label="More filters" title="Search payments" summary={query.search || null} onClear={() => onChange({ search: "" })}>
         {(close) => (
           <SearchForm

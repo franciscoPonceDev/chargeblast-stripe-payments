@@ -30,6 +30,7 @@ export function CopyIdButton({ id, visible = false }: { id: string; visible?: bo
     }
   }
 
+  // Trade-off: copy button revealed on hover/focus (desktop-first); touch users get it via focus only.
   return (
     <span className="inline-flex items-center">
       <Tooltip content="Copy payment ID">

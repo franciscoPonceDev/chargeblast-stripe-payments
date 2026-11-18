@@ -78,3 +78,16 @@ npm run build && npx next start -p 3200
 npx lighthouse http://localhost:3200/payments --output=json --chrome-flags="--headless=new"            # mobile
 npx lighthouse http://localhost:3200/payments --preset=desktop --output=json --chrome-flags="--headless=new"
 ```
+
+## Re-check after the final review fixes (2026-11-18)
+
+The final review moved the shared tooltip provider and screen-reader announcer into the root layout. Fresh `npm run build` and `npm run lhci` (desktop, 3 runs each) on `d36155e`:
+
+| Metric | Value |
+| --- | --- |
+| First-load JS `/payments` | 198 kB |
+| First-load JS `/payments/[id]` | 161 kB |
+| First-load JS shared | 146 kB (provider code moved from page chunks into the shared chunk) |
+| `/payments` desktop Performance | 98, 98, 100 (LCP 274-313 ms, CLS 0-0.004, TBT 59-125 ms) |
+| Details desktop Performance | 100, 100, 100 (LCP 230-246 ms, CLS 0, TBT 22-43 ms) |
+| Accessibility / Best practices | 100 / 100 on every run |

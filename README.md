@@ -13,7 +13,7 @@ A Next.js + TypeScript rebuild of the Stripe Dashboard "Transactions → Payment
 
 - **Measured, not eyeballed.** Spacing, colors, type and shadows come from a computed-style capture of the live Stripe dashboard, stored as design tokens. [See the evidence](#fidelity-method).
 - **Shared links render correctly before any JavaScript.** The server renders the exact filtered page; after that, filtering, sorting and paging run in the browser with zero server round trips.
-- **Fast.** Desktop Lighthouse 99-100, layout shift ~0, desktop LCP under 0.3 s. 142 KB of HTML cut by drawing card logos once per page.
+- **Fast.** Desktop Lighthouse 98-100, layout shift ~0, desktop LCP about 0.3 s. 142 KB of HTML cut by drawing card logos once per page.
 - **Growth-ready analytics.** Typed events into GTM with Consent Mode v2, optional server-side tagging and PostHog, Web Vitals, and a flicker-free A/B test. No personal data in any event.
 - **Tested end to end.** 330 unit tests, 24 Playwright tests with axe accessibility scans, visual regression, and CI that fails on a Lighthouse budget.
 
@@ -217,16 +217,16 @@ Method: production build, Lighthouse CLI with simulated throttling, median of 3 
 
 | Metric | Before | After |
 | --- | --- | --- |
-| `/payments` first-load JS | 202 kB | **196 kB** |
+| `/payments` first-load JS | 202 kB | **198 kB** (196 kB before the final a11y fixes) |
 | `/payments` HTML document (raw) | 315 KB | 287 KB |
 | `/payments` mobile Performance | 75 | **78** |
 | `/payments` mobile TBT | 1322 ms | 993 ms |
 | `/payments` mobile LCP | 934 ms | 1098 ms |
 | `/payments` desktop Performance | 99 | **100** |
-| `/payments` desktop CLS | 0 | 0.002 |
+| `/payments` desktop CLS | 0 | 0-0.004 |
 | `/payments/[id]` mobile / desktop Performance | 87 / 100 | 85 / 100 |
 
-**The mobile Lighthouse Performance target (95) was not met**: 78 for the list, 85 for the details page. The test machine scored below Lighthouse's reference device, so mobile numbers are pessimistic. More importantly, under 4x CPU throttle the React and Next runtime alone (about 100 kB gzip) costs roughly 500 ms of TBT, and even the static details page, with almost nothing on it, lands at 85-89. Mobile TBT also varies by about 300 ms between runs, so small mobile deltas (including LCP going up) are noise. Desktop meets 95 (99-100), LCP is under 1.5 s everywhere, and CLS is 0-0.002.
+**The mobile Lighthouse Performance target (95) was not met**: 78 for the list, 85 for the details page. The test machine scored below Lighthouse's reference device, so mobile numbers are pessimistic. More importantly, under 4x CPU throttle the React and Next runtime alone (about 100 kB gzip) costs roughly 500 ms of TBT, and even the static details page, with almost nothing on it, lands at 85-89. Mobile TBT also varies by about 300 ms between runs, so small mobile deltas (including LCP going up) are noise. Desktop meets 95 (98-100 in the latest run), LCP is under 1.5 s everywhere, and CLS is 0-0.004.
 
 What moved the numbers:
 

@@ -43,7 +43,7 @@ export function PaymentDetails({ payment: p, now }: { payment: Payment; now: num
   const metadata = metadataFor(p.id);
   return (
     <div className="max-w-4xl">
-      <BrandSprite />
+      {p.method.brand && <BrandSprite brands={[p.method.brand]} />}
       <nav aria-label="Breadcrumb" className="mt-(--space-page-top)">
         <Link
           href="/payments"

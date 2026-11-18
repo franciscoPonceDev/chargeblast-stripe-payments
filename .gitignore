@@ -24,3 +24,6 @@ scripts/screenshot.mjs
 scripts/shell-shots.mjs
 .claude/
 jd.md
+
+.vercel
+.env*

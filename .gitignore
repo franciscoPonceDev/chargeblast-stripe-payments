@@ -28,3 +28,8 @@ jd.md
 .vercel
 .env*
 docs/superpowers/
+
+# e2e / lighthouse output
+playwright-report/
+test-results/
+.lighthouseci/

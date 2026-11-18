@@ -10,7 +10,10 @@
     "test": "vitest",
     "test:run": "vitest run",
     "typecheck": "tsc --noEmit",
-    "generate:data": "npx tsx scripts/generate-data.ts"
+    "generate:data": "npx tsx scripts/generate-data.ts",
+    "test:e2e": "playwright test --project=chromium",
+    "test:visual": "playwright test --project=visual",
+    "lhci": "lhci autorun"
   },
   "dependencies": {
     "@date-fns/tz": "^1.5.0",
@@ -29,7 +32,10 @@
     "server-only": "^0.0.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@eslint/eslintrc": "^3",
+    "@lhci/cli": "^0.16.1",
+    "@playwright/test": "^1.65.1",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",

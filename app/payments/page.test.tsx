@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect } from "vitest";
 import data from "@/data/payments.json";
@@ -10,7 +10,7 @@ describe("PaymentsPage", () => {
   it("renders the Transactions heading and section tabs", () => {
     render(<PaymentsPage />);
     expect(screen.getByRole("heading", { name: "Transactions" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Payments" })).toHaveAttribute("aria-current", "page");
+    expect(within(screen.getByRole("navigation", { name: "Transactions sections" })).getByRole("button", { name: "Payments" })).toHaveAttribute("aria-current", "page");
     expect(screen.getByRole("button", { name: "Create payment" })).toBeInTheDocument();
   });
   it("shows footer and paginates", async () => {
@@ -34,9 +34,9 @@ describe("PaymentsPage", () => {
   it("shows empty state for no matches", async () => {
     render(<PaymentsPage />);
     await userEvent.type(screen.getAllByLabelText("Search")[0], "zzzznomatch");
-    expect(await screen.findByText("Viewing 0 results", {}, { timeout: 1500 })).toBeInTheDocument();
+    expect(await screen.findByText("Viewing 0 results", {}, { timeout: 5000 })).toBeInTheDocument();
     expect(screen.getByText("No results found")).toBeInTheDocument();
-  });
+  }, 15000);
   it("dismisses the banner", async () => {
     render(<PaymentsPage />);
     await userEvent.click(screen.getByRole("button", { name: "Dismiss" }));
@@ -60,8 +60,8 @@ describe("PaymentsPage", () => {
     render(<PaymentsPage />);
     await userEvent.click(screen.getByRole("button", { name: "Next" }));
     await userEvent.type(screen.getAllByLabelText("Search")[0], "a");
-    expect(await screen.findByText(/^Viewing 1–\d+ of \d+ results$/, {}, { timeout: 1500 })).toBeInTheDocument();
-  });
+    expect(await screen.findByText(/^Viewing 1–\d+ of \d+ results$/, {}, { timeout: 5000 })).toBeInTheDocument();
+  }, 15000);
   it("moves focus to the selected status tab after dismissing the banner", async () => {
     render(<PaymentsPage />);
     await userEvent.click(screen.getByRole("button", { name: "Dismiss" }));

@@ -15,7 +15,7 @@ const CARDS: Record<CardBrand, ComponentType<SVGProps<SVGSVGElement>>> = {
   discover: DiscoverFlatRoundedIcon,
 };
 
-const BASE = "inline-flex h-4 w-6 shrink-0 items-center justify-center overflow-hidden rounded-sm";
+const BASE = "inline-flex align-middle h-4 w-6 shrink-0 items-center justify-center overflow-hidden rounded-sm";
 
 export function BrandMark({ brand }: { brand: CardBrand }) {
   const Card = CARDS[brand];
@@ -46,7 +46,7 @@ export function WalletMark({ wallet }: { wallet: WalletKind }) {
   const apple = wallet === "apple_pay";
   return (
     <span
-      className={`${BASE} border border-border bg-surface text-text-primary`}
+      className={`${BASE} p-0.5 ${apple ? "bg-mark-apple text-mark-apple-fg" : "border border-border bg-surface text-text-primary"}`}
       role="img"
       aria-label={apple ? "Apple Pay" : "Google Pay"}
     >

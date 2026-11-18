@@ -173,7 +173,7 @@ Columns in order (x, w, align, pad L/R):
 | Wallet / Customer name | `—` (em dash) 14px `#1a2c44` |
 | Date | `#1a2c44` 14px 400 |
 | Description | `Subscription update` `#1a2c44` |
-| Email | `#1a2c44`, e.g. `liam.miller155@icloud.com` |
+| Email | `#1a2c44`, e.g. `customer@example.com` |
 | ID chip | button 210.1x26 at x1584,y+9; padding 2/4/2/6; gap 4; bg `#f4f7fa`; border 1px `#ecf1f6`; radius 6; text 12px `"Source Code Pro"` `#3c4f69` (middle-truncated with "…" for long ids); copy icon 12px `#3c4f69` in 16x16 box at right |
 | Row hover actions | absolute group 88x30 right-aligned ending x1377 (y+7), bg white, border 1px `#ecf1f6`, radius 6, opacity 0 (hover only); three 28x28 buttons (padding 4/8, min-h 24; icons 12px `#273951`) separated by 1px x 28 dividers `#ecf1f6`: Refund payment, Send receipt, More actions ("…") |
 | Right sticky mask | 8px-wide white spans at x280 and x1377 (sticky edge fills) |

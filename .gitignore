@@ -23,3 +23,4 @@ scripts/capture-stripe-styles.js
 scripts/screenshot.mjs
 scripts/shell-shots.mjs
 .claude/
+jd.md

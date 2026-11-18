@@ -20,7 +20,7 @@ export function PageHeader() {
             type="button"
             aria-current={i === 0 ? "page" : undefined}
             className={clsx(
-              "relative h-9 cursor-pointer whitespace-nowrap px-3 text-body font-semibold first:-ml-3",
+              "relative h-9 cursor-pointer whitespace-nowrap px-3 text-body font-semibold first:-ml-3 focus-visible:shadow-focus",
               i === 0
                 ? "text-text-primary after:absolute after:inset-x-3 after:-bottom-px after:h-0.5 after:bg-text-primary"
                 : "text-text-secondary hover:text-text-primary",

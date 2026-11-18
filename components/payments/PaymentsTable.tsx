@@ -11,6 +11,14 @@ import type { SortState } from "@/lib/payments/query";
 import type { Payment } from "@/lib/payments/types";
 import { buildColumns } from "./columns";
 
+function padFor(id: string) {
+  if (id === "select") return "w-10 px-(--space-cell-select)";
+  if (id === "actions") return "w-(--size-actions-col) min-w-(--size-actions-col) px-1";
+  if (id === "amount") return "pr-1 pl-(--space-cell-x)";
+  if (id === "currency") return "pr-(--space-cell-x) pl-0";
+  return "px-(--space-cell-x)";
+}
+
 export const EMPTY_MESSAGE = "No results found";
 
 export function PaymentsTable({
@@ -66,7 +74,7 @@ export function PaymentsTable({
                   key={h.id}
                   scope="col"
                   aria-sort={ariaSort(h.column.id)}
-                  className={`${h.column.id === "select" ? "w-10 px-[13px]" : h.column.id === "actions" ? "sticky right-0 w-10 bg-surface px-2" : "px-4"} py-2.5 text-caption leading-5 font-semibold text-text-secondary shadow-[inset_0_-1px_0_var(--color-border-row)] ${h.column.id === "amount" ? "text-right" : "text-left"}`}
+                  className={`${padFor(h.column.id)}${h.column.id === "actions" ? " sticky right-0 bg-surface" : ""} py-2.5 text-caption leading-5 font-semibold text-text-secondary shadow-[inset_0_-1px_0_var(--color-border-row)] ${h.column.id === "amount" ? "text-right" : "text-left"}`}
                 >
                   {flexRender(h.column.columnDef.header, h.getContext())}
                 </th>
@@ -77,7 +85,7 @@ export function PaymentsTable({
         <tbody>
           {bodyRows.length === 0 ? (
             <tr>
-              <td colSpan={columns.length} className="px-4 py-8 text-center text-text-muted">
+              <td colSpan={columns.length} className="px-(--space-cell-x) py-8 text-center text-text-muted">
                 {EMPTY_MESSAGE}
               </td>
             </tr>
@@ -87,7 +95,7 @@ export function PaymentsTable({
                 {row.getVisibleCells().map((cell) => (
                   <td
                     key={cell.id}
-                    className={`${cell.column.id === "select" ? "px-[13px]" : cell.column.id === "actions" ? "sticky right-0 w-10 bg-surface px-2 group-focus-within:bg-bg-hover group-hover:bg-bg-hover" : "px-4"} py-0 shadow-[inset_0_-1px_0_var(--color-border-row)] ${cell.column.id === "amount" ? "text-right" : "text-left"}`}
+                    className={`${padFor(cell.column.id)}${cell.column.id === "actions" ? " sticky right-0 bg-surface group-focus-within:bg-bg-hover group-hover:bg-bg-hover" : ""} py-0 shadow-[inset_0_-1px_0_var(--color-border-row)] ${cell.column.id === "amount" ? "text-right" : "text-left"}`}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>

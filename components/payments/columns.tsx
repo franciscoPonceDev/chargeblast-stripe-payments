@@ -41,26 +41,18 @@ export function buildColumns({ sort, onSortChange, now }: ColumnCtx): ColumnDef<
       id: "amount",
       header: () => <SortHeader id="amount" label="Amount" sort={sort} onSortChange={onSortChange} align="right" />,
       cell: ({ row: { original: p } }) => (
-        <span className="flex items-baseline justify-end gap-1">
-          <span className="font-semibold tabular-nums">{formatAmount(p.amount, p.currency)}</span>
-          <span className="text-text-secondary">{currencyCode(p.currency)}</span>
-        </span>
+        <span className="font-semibold tabular-nums">{formatAmount(p.amount, p.currency)}</span>
       ),
+    },
+    {
+      id: "currency",
+      header: () => <span className="sr-only">Currency</span>,
+      cell: ({ row: { original: p } }) => <span className="text-text-secondary">{currencyCode(p.currency)}</span>,
     },
     {
       id: "status",
       header: () => <SortHeader id="status" label="Status" sort={sort} onSortChange={onSortChange} />,
       cell: ({ row }) => <StatusBadge status={row.original.status} />,
-    },
-    {
-      id: "paymentId",
-      header: "Payment ID",
-      cell: ({ row }) => (
-        <span className="inline-flex h-[26px] items-center gap-1 rounded-md border border-border-row bg-bg-hover py-0.5 pr-1 pl-1.5 font-mono text-caption text-text-secondary">
-          <span className="tabular-nums">{shortenId(row.original.id)}</span>
-          <CopyIdButton id={row.original.id} />
-        </span>
-      ),
     },
     {
       id: "method",
@@ -70,12 +62,12 @@ export function buildColumns({ sort, onSortChange, now }: ColumnCtx): ColumnDef<
     {
       id: "description",
       header: "Description",
-      cell: ({ row }) => <span className="block max-w-48 truncate">{row.original.description}</span>,
+      cell: ({ row }) => <span className="block max-w-40 truncate">{row.original.description}</span>,
     },
     {
       id: "customer",
       header: "Customer",
-      cell: ({ row }) => <span className="block max-w-56 truncate">{row.original.customerEmail}</span>,
+      cell: ({ row }) => <span title={row.original.customerEmail} className="block max-w-48 truncate">{row.original.customerEmail}</span>,
     },
     {
       id: "created",
@@ -90,7 +82,21 @@ export function buildColumns({ sort, onSortChange, now }: ColumnCtx): ColumnDef<
     {
       id: "declineReason",
       header: "Decline reason",
-      cell: ({ row }) => row.original.declineReason ?? DASH,
+      cell: ({ row }) => (
+        <span title={row.original.declineReason ?? undefined} className="block max-w-40 truncate">
+          {row.original.declineReason ?? DASH}
+        </span>
+      ),
+    },
+    {
+      id: "paymentId",
+      header: "Payment ID",
+      cell: ({ row }) => (
+        <span className="inline-flex h-(--size-chip) items-center gap-1 rounded-md border border-border-row bg-bg-hover py-0.5 pr-1 pl-1.5 font-mono text-caption text-text-secondary">
+          <span className="tabular-nums">{shortenId(row.original.id)}</span>
+          <CopyIdButton id={row.original.id} />
+        </span>
+      ),
     },
     {
       id: "actions",

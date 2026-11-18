@@ -72,11 +72,11 @@ function DateForm({ value, onApply }: { value: DateFilter; onApply: (d: DateFilt
       ))}
       {preset === "custom" && (
         <div className="flex flex-col gap-2 pt-1">
-          <label className="flex flex-col gap-1 text-xs text-text-secondary">
+          <label className="flex flex-col gap-1 text-caption text-text-secondary">
             From
             <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className={inputClass} />
           </label>
-          <label className="flex flex-col gap-1 text-xs text-text-secondary">
+          <label className="flex flex-col gap-1 text-caption text-text-secondary">
             To
             <input type="date" value={to} onChange={(e) => setTo(e.target.value)} className={inputClass} />
           </label>

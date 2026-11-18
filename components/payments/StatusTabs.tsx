@@ -37,10 +37,10 @@ export function StatusTabs({ value, onChange }: { value: StatusTab; onChange: (t
             tabIndex={selected ? 0 : -1}
             onClick={() => onChange(t.id)}
             className={clsx(
-              "h-[38px] cursor-pointer rounded-lg bg-surface px-3 text-left text-body font-semibold text-text-primary",
+              "h-(--size-card) cursor-pointer rounded-lg bg-surface px-3 text-left text-body focus-visible:shadow-focus",
               selected
-                ? "border-2 border-text-primary px-[11px]"
-                : "border border-border-row hover:bg-bg-hover",
+                ? "border-2 border-brand px-[calc(var(--spacing)*3-1px)] font-semibold text-brand"
+                : "border border-border-row font-normal text-text-secondary hover:bg-bg-hover",
             )}
           >
             {t.label}

@@ -25,13 +25,13 @@ export function Button({
         "inline-flex items-center justify-center gap-1.5 whitespace-nowrap cursor-pointer select-none",
         "disabled:opacity-50 disabled:cursor-not-allowed",
         pill
-          ? "h-(--size-control-md) px-2 text-caption leading-4 font-semibold rounded-lg border border-dashed border-border text-control bg-surface enabled:hover:bg-bg-hover"
+          ? "h-(--size-control-md) px-2 text-caption leading-4 font-semibold rounded-full border border-dashed border-border text-control bg-surface focus-visible:shadow-focus enabled:hover:bg-bg-hover"
           : [
               "px-2 text-body font-semibold rounded-md",
               size === "sm" ? "h-(--size-control-sm)" : "h-(--size-control-md)",
               variant === "primary"
-                ? "bg-brand text-on-brand enabled:hover:bg-brand-hover"
-                : "bg-surface text-control shadow-ring enabled:hover:bg-bg-hover",
+                ? "bg-brand text-on-brand focus-visible:shadow-focus enabled:hover:bg-brand-hover"
+                : "bg-surface text-control shadow-ring focus-visible:shadow-ring-focus enabled:hover:bg-bg-hover",
             ],
         className,
       )}

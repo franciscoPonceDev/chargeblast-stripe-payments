@@ -32,7 +32,7 @@ export function SortHeader({
     <button
       type="button"
       onClick={(e) => onSortChange(nextSort(sort, id, e.shiftKey))}
-      className={`inline-flex cursor-pointer items-center gap-1 rounded-sm font-semibold outline-transparent ${align === "right" ? "flex-row-reverse" : ""}`}
+      className={`inline-flex cursor-pointer items-center gap-1 rounded-sm font-semibold focus-visible:shadow-focus ${align === "right" ? "flex-row-reverse" : ""}`}
     >
       {label}
       {cur && <Icon name={cur.desc ? "chevron-down" : "chevron-up"} size={12} />}

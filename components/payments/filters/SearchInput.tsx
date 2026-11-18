@@ -41,7 +41,7 @@ export function SearchInput({ value, onChange }: { value: string; onChange: (v: 
             onChange(v);
           }, 200);
         }}
-        className="h-9 w-full rounded-lg bg-bg-hover pr-3 pl-8 text-body text-text-primary placeholder:text-text-secondary"
+        className="h-9 w-full rounded-lg bg-bg-hover pr-3 pl-8 text-body text-text-primary placeholder:text-text-secondary focus-visible:shadow-focus"
       />
     </div>
   );

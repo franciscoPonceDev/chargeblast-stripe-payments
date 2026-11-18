@@ -44,7 +44,7 @@ export default function PaymentsPage() {
           <Button icon="gear">Edit columns</Button>
         </div>
       </div>
-      <div className="mt-4 overflow-x-auto">
+      <div className="mt-4">
         <PaymentsTable rows={result.rows} sort={query.sort} onSortChange={onSortChange} now={MOCK_NOW} />
       </div>
       <TableFooter

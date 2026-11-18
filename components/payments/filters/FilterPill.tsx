@@ -5,7 +5,7 @@ import clsx from "clsx";
 import { Button, Icon, Popover } from "@/components/ui";
 
 export const inputClass =
-  "h-(--size-control-md) w-full rounded-md bg-surface px-2 text-body text-text-primary shadow-ring";
+  "h-(--size-control-md) w-full rounded-md bg-surface px-2 text-body text-text-primary shadow-ring focus-visible:shadow-ring-focus";
 
 interface FilterPillProps {
   label: string;
@@ -27,7 +27,7 @@ export function FilterPill({ label, summary, onClear, title, children }: FilterP
   return (
     <div
       className={clsx(
-        "inline-flex h-(--size-control-md) items-center rounded-lg text-caption leading-4 font-semibold text-control",
+        "inline-flex h-(--size-control-md) items-center rounded-full text-caption leading-4 font-medium text-control",
         set && "border border-border bg-surface",
       )}
     >
@@ -39,7 +39,7 @@ export function FilterPill({ label, summary, onClear, title, children }: FilterP
             onClear();
             triggerRef.current?.focus();
           }}
-          className="ml-1 flex size-4 cursor-pointer items-center justify-center rounded-full hover:bg-bg-hover"
+          className="ml-1 flex size-4 cursor-pointer items-center justify-center rounded-full hover:bg-bg-hover focus-visible:shadow-focus"
         >
           <Icon name="x" size={10} />
         </button>
@@ -48,16 +48,16 @@ export function FilterPill({ label, summary, onClear, title, children }: FilterP
         open={open}
         onOpenChange={setOpen}
         aria-labelledby={titleId}
-        className="w-[320px] p-3"
+        className="w-(--size-popover) p-3"
         trigger={
           <button
             ref={triggerRef}
             type="button"
             className={clsx(
-              "flex h-full cursor-pointer items-center gap-2 outline-transparent",
+              "flex h-full cursor-pointer items-center gap-2 focus-visible:shadow-focus",
               set
-                ? "rounded-r-lg pr-2 pl-1"
-                : "rounded-lg border border-dashed border-border bg-surface px-2 enabled:hover:bg-bg-hover",
+                ? "rounded-r-full pr-2 pl-1"
+                : "rounded-full border border-dashed border-border bg-surface px-2 enabled:hover:bg-bg-hover",
             )}
           >
             {!set && <Icon name="circle-plus" />}

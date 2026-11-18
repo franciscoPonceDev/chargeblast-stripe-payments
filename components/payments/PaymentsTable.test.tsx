@@ -45,8 +45,8 @@ describe("PaymentsTable", () => {
     setup();
     const labels = screen.getAllByRole("columnheader").map((h) => h.textContent);
     expect(labels.filter(Boolean)).toEqual([
-      "Amount", "Status", "Payment ID", "Payment method", "Description", "Customer", "Date",
-      "Refunded date", "Decline reason", "Actions",
+      "Amount", "Currency", "Status", "Payment method", "Description", "Customer", "Date",
+      "Refunded date", "Decline reason", "Payment ID", "Actions",
     ]);
   });
 

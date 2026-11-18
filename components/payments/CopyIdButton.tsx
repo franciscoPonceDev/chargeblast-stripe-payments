@@ -37,12 +37,12 @@ export function CopyIdButton({ id }: { id: string }) {
           type="button"
           aria-label="Copy payment ID"
           onClick={copy}
-          className="inline-flex size-4 cursor-pointer items-center justify-center rounded-sm text-text-secondary opacity-0 hover:bg-border-row focus-visible:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100"
+          className="inline-flex size-4 cursor-pointer items-center justify-center rounded-sm text-text-secondary opacity-0 hover:bg-border-row focus-visible:shadow-focus focus-visible:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100"
         >
           <Icon name="copy" size={12} />
         </button>
       </Tooltip>
-      <span role="status" className={copied ? "ml-1 text-xs text-text-secondary" : "sr-only"}>
+      <span role="status" className={copied ? "ml-1 text-caption text-text-secondary" : "sr-only"}>
         {copied ? "Copied" : ""}
       </span>
     </span>

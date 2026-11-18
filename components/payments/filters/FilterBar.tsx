@@ -12,7 +12,7 @@ function SearchForm({ value, onApply }: { value: string; onApply: (s: string) =>
   const [draft, setDraft] = useState(value);
   return (
     <FilterForm canApply onApply={() => onApply(draft.trim())}>
-      <label className="flex flex-col gap-1 text-xs text-text-secondary">
+      <label className="flex flex-col gap-1 text-caption text-text-secondary">
         Search
         <input
           type="text"

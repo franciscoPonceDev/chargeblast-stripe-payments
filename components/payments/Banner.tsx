@@ -13,7 +13,7 @@ export function Banner({ onDismiss }: { onDismiss?: () => void }) {
         New
       </span>
       <span className="min-w-0 flex-1">Rule Attributes are now in Sigma and Data Pipeline for better fraud insights.</span>
-      <button type="button" className="ml-8 cursor-pointer rounded-sm text-brand hover:text-brand-hover">
+      <button type="button" className="ml-8 cursor-pointer rounded-sm text-brand hover:text-brand-hover focus-visible:shadow-focus">
         Get started
       </button>
       <button
@@ -23,7 +23,7 @@ export function Banner({ onDismiss }: { onDismiss?: () => void }) {
           setOpen(false);
           onDismiss?.();
         }}
-        className="-mr-2 inline-flex size-7 cursor-pointer items-center justify-center rounded-md text-brand-subtle hover:bg-border-row"
+        className="-mr-2 inline-flex size-7 cursor-pointer items-center justify-center rounded-md text-brand hover:bg-border-row focus-visible:shadow-focus"
       >
         <Icon name="x" size={12} />
       </button>

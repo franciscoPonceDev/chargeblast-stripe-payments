@@ -3,6 +3,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { AppShell } from "@/components/shell/AppShell";
 import { Banner } from "@/components/payments/Banner";
+import { EditColumns } from "@/components/payments/EditColumns";
 import { ExportButton } from "@/components/payments/ExportButton";
 import { FilterBar } from "@/components/payments/filters/FilterBar";
 import { SearchInput } from "@/components/payments/filters/SearchInput";
@@ -10,7 +11,7 @@ import { PageHeader } from "@/components/payments/PageHeader";
 import { PaymentsTable } from "@/components/payments/PaymentsTable";
 import { StatusTabs } from "@/components/payments/StatusTabs";
 import { TableFooter } from "@/components/payments/TableFooter";
-import { Button } from "@/components/ui";
+import { useTableSettings } from "@/lib/payments/tableSettings";
 import { type PaymentsQuery, type SortState, type StatusTab } from "@/lib/payments/query";
 import { parseQuery, serializeQuery } from "@/lib/payments/url";
 import type { Payment } from "@/lib/payments/types";
@@ -141,6 +142,7 @@ export function PaymentsView({ initialRows, initialTotal, initialQuery, counts, 
     synced.current = urlString;
     replace(parseQuery(new URLSearchParams(urlString)));
   }, [urlString, isPending, replace]);
+  const { settings, setColumnVisible, setWrap, reset: resetSettings } = useTableSettings();
   const tabsRef = useRef<HTMLDivElement>(null);
   const onSortChange = useCallback((sort: SortState[]) => update({ sort }), [update]);
   const focusTabs = useCallback(() => {
@@ -159,11 +161,16 @@ export function PaymentsView({ initialRows, initialTotal, initialQuery, counts, 
         <FilterBar query={query} onChange={update} />
         <div className="flex items-center gap-2">
           <ExportButton all={all} status={status} query={query} now={now} />
-          <Button icon="gear">Edit columns</Button>
+          <EditColumns
+            settings={settings}
+            onColumnVisibleChange={setColumnVisible}
+            onWrapChange={setWrap}
+            onReset={resetSettings}
+          />
         </div>
       </div>
       <div className="mt-4" aria-busy={(status === "loading" && pending) || undefined}>
-        <PaymentsTable rows={result.rows} sort={query.sort} onSortChange={onSortChange} now={now} />
+        <PaymentsTable rows={result.rows} sort={query.sort} onSortChange={onSortChange} now={now} hiddenColumns={settings.hidden} wrap={settings.wrap} />
       </div>
       <TableFooter
         result={result}

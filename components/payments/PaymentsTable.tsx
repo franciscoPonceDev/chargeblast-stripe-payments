@@ -22,6 +22,8 @@ function padFor(id: string) {
 
 const INTERACTIVE = "a, button, input, label, [role='checkbox'], [role='button']";
 
+const NONE: readonly string[] = [];
+
 export const EMPTY_MESSAGE = "No results found";
 
 function PaymentsTableImpl({
@@ -29,16 +31,21 @@ function PaymentsTableImpl({
   sort,
   onSortChange,
   now,
+  hiddenColumns = NONE,
+  wrap = false,
 }: {
   rows: Payment[];
   sort: SortState[];
   onSortChange: (s: SortState[]) => void;
   now: number;
+  hiddenColumns?: readonly string[];
+  wrap?: boolean;
 }) {
   const router = useRouter();
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const columns = useMemo(() => buildColumns({ sort, onSortChange, now }), [sort, onSortChange, now]);
   const sorting: SortingState = sort;
+  const columnVisibility = useMemo(() => Object.fromEntries(hiddenColumns.map((id) => [id, false])), [hiddenColumns]);
 
   useEffect(() => {
     const ids = new Set(rows.map((r) => r.id));
@@ -55,7 +62,7 @@ function PaymentsTableImpl({
     getRowId: (p) => p.id,
     getCoreRowModel: getCoreRowModel(),
     manualSorting: true,
-    state: { sorting, rowSelection },
+    state: { sorting, rowSelection, columnVisibility },
     onRowSelectionChange: setRowSelection,
     enableRowSelection: true,
   });
@@ -90,7 +97,7 @@ function PaymentsTableImpl({
         <tbody>
           {bodyRows.length === 0 ? (
             <tr>
-              <td colSpan={columns.length} className="px-(--space-cell-x) py-8 text-center text-text-muted">
+              <td colSpan={table.getVisibleLeafColumns().length} className="px-(--space-cell-x) py-8 text-center text-text-muted">
                 {EMPTY_MESSAGE}
               </td>
             </tr>
@@ -110,7 +117,7 @@ function PaymentsTableImpl({
                 {row.getVisibleCells().map((cell) => (
                   <td
                     key={cell.id}
-                    className={`${padFor(cell.column.id)}${cell.column.id === "actions" ? " sticky right-0 bg-surface group-focus-within:bg-bg-hover group-hover:bg-bg-hover" : ""} py-0 shadow-[inset_0_-1px_0_var(--color-border-row)] ${cell.column.id === "amount" ? "text-right" : "text-left"}`}
+                    className={`${padFor(cell.column.id)}${cell.column.id === "actions" ? " sticky right-0 bg-surface group-focus-within:bg-bg-hover group-hover:bg-bg-hover" : ""} py-0${wrap ? " whitespace-normal [&_.truncate]:whitespace-normal" : ""} shadow-[inset_0_-1px_0_var(--color-border-row)] ${cell.column.id === "amount" ? "text-right" : "text-left"}`}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>

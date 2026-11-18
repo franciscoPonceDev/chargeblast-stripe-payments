@@ -11,10 +11,32 @@ import {
 } from "./query";
 import type { Payment } from "./types";
 
-export function usePaymentsQuery(all: Payment[], now: number) {
+export interface InitialPayments {
+  result: QueryResult;
+  counts: Record<StatusTab, number>;
+}
+
+const EMPTY: InitialPayments = {
+  result: { rows: [], total: 0, page: 0, pageCount: 1 },
+  counts: { all: 0, succeeded: 0, refunded: 0, disputed: 0, failed: 0, uncaptured: 0 },
+};
+
+/**
+ * `all` may be null while the full dataset is loading; the server-computed
+ * `initial` result/counts are returned until it arrives. Updates made meanwhile
+ * are kept in `query` and applied as soon as `all` lands.
+ */
+export function usePaymentsQuery(all: Payment[] | null, now: number, initial: InitialPayments = EMPTY) {
   const [query, setQuery] = useState<PaymentsQuery>(DEFAULT_QUERY);
-  const counts: Record<StatusTab, number> = useMemo(() => tabCounts(all), [all]);
-  const result: QueryResult = useMemo(() => applyQuery(all, query, now), [all, query, now]);
+  const counts: Record<StatusTab, number> = useMemo(
+    () => (all ? tabCounts(all) : initial.counts),
+    [all, initial.counts],
+  );
+  const result: QueryResult = useMemo(
+    () => (all ? applyQuery(all, query, now) : initial.result),
+    [all, query, now, initial.result],
+  );
+  const pending = all === null && query !== DEFAULT_QUERY;
 
   const update = useCallback((patch: Partial<PaymentsQuery>) => {
     const keys = Object.keys(patch);
@@ -24,5 +46,5 @@ export function usePaymentsQuery(all: Payment[], now: number) {
   const setPage = useCallback((n: number) => setQuery((q) => ({ ...q, page: n })), []);
   const reset = useCallback(() => setQuery(DEFAULT_QUERY), []);
 
-  return { query, result, counts, update, setPage, reset };
+  return { query, result, counts, pending, update, setPage, reset };
 }

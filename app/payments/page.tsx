@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { SITE_NAME } from "@/lib/seo";
+import { BrandSprite } from "@/components/payments/BrandSprite";
 import { PaymentsView } from "@/components/payments/PaymentsView";
 import { ALL_PAYMENTS, DATA_VERSION } from "@/lib/payments/data";
 import { MOCK_NOW } from "@/lib/payments/generate";
@@ -26,14 +27,17 @@ export default async function PaymentsPage({
   // The cookie is assigned in middleware.ts, so the banner copy is correct on the first server render.
   const bannerVariant = parseVariant((await cookies()).get(BANNER_COOKIE)?.value) ?? "a";
   return (
-    <PaymentsView
-      initialRows={rows}
-      initialTotal={total}
-      initialQuery={{ ...parsed, page }}
-      counts={tabCounts(ALL_PAYMENTS)}
-      now={MOCK_NOW}
-      dataVersion={DATA_VERSION}
-      bannerVariant={bannerVariant}
-    />
+    <>
+      <BrandSprite />
+      <PaymentsView
+        initialRows={rows}
+        initialTotal={total}
+        initialQuery={{ ...parsed, page }}
+        counts={tabCounts(ALL_PAYMENTS)}
+        now={MOCK_NOW}
+        dataVersion={DATA_VERSION}
+        bannerVariant={bannerVariant}
+      />
+    </>
   );
 }

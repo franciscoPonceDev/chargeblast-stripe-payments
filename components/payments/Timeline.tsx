@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import { Tooltip } from "@/components/ui";
-import { formatDateTime, formatRelative } from "@/lib/format";
+import { formatDateTime } from "@/lib/format";
+import { RelativeTime } from "./RelativeTime";
 import type { TimelineEvent, TimelineTone } from "@/lib/payments/timeline";
 
 const DOT: Record<TimelineTone, string> = {
@@ -21,7 +22,7 @@ export function Timeline({ events, now }: { events: TimelineEvent[]; now: number
           <div className="min-w-0">
             <div className="font-semibold text-text-primary">{e.label}</div>
             {e.detail && <div className="text-caption text-text-muted">{e.detail}</div>}
-            <Tooltip content={formatRelative(e.at, now)}>
+            <Tooltip content={<RelativeTime ms={e.at} now={now} />}>
               <time dateTime={new Date(e.at).toISOString()} className="text-caption text-text-secondary">
                 {formatDateTime(e.at, now)}
               </time>

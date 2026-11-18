@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { track } from "@/lib/analytics/events";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui";
@@ -8,6 +7,7 @@ import type { Payment } from "@/lib/payments/types";
 import { CopyIdButton } from "./CopyIdButton";
 import { CreatedCell } from "./CreatedCell";
 import { RowActions } from "./RowActions";
+import { PaymentLink } from "./PaymentLink";
 import { PaymentMethodCell } from "./PaymentMethodCell";
 import { SortHeader } from "./SortHeader";
 import { StatusBadge } from "./StatusBadge";
@@ -43,14 +43,14 @@ export function buildColumns({ sort, onSortChange, now }: ColumnCtx): ColumnDef<
       id: "amount",
       header: () => <SortHeader id="amount" label="Amount" sort={sort} onSortChange={onSortChange} align="right" />,
       cell: ({ row: { original: p } }) => (
-        <Link
+        <PaymentLink
           href={`/payments/${p.id}`}
           onClick={() => track("payment_opened", {})}
           aria-label={`${formatAmount(p.amount, p.currency)}, view payment ${shortenId(p.id)}`}
           className="rounded-sm font-semibold tabular-nums hover:underline focus-visible:shadow-focus"
         >
           {formatAmount(p.amount, p.currency)}
-        </Link>
+        </PaymentLink>
       ),
     },
     {

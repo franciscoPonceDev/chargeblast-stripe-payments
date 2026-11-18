@@ -6,7 +6,7 @@ import { feeFor, metadataFor, netFor, statementDescriptor } from "@/lib/payments
 import { STATUS_LABELS } from "@/lib/payments/query";
 import { buildTimeline } from "@/lib/payments/timeline";
 import type { Payment, PaymentMethod } from "@/lib/payments/types";
-import { BrandSprite } from "./BrandMark";
+import { BrandSprite } from "./BrandSprite";
 import { CopyIdButton } from "./CopyIdButton";
 import { PaymentMethodCell } from "./PaymentMethodCell";
 import { StatusBadge } from "./StatusBadge";

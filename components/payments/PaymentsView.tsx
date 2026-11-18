@@ -18,37 +18,86 @@ export interface PaymentsViewProps {
   initialTotal: number;
   counts: Record<StatusTab, number>;
   now: number;
+  dataVersion: string;
 }
 
 let inflight: Promise<Payment[]> | null = null;
-function loadAll(): Promise<Payment[]> {
+let cachedAll: Payment[] | null = null;
+
+/** Test-only: forget the module-level dataset cache and in-flight request. */
+export function __resetPaymentsCacheForTests() {
+  inflight = null;
+  cachedAll = null;
+}
+
+function loadAll(version: string): Promise<Payment[]> {
+  if (cachedAll) return Promise.resolve(cachedAll);
   if (!inflight) {
-    const p = fetch("/api/payments").then((r) => {
+    const p = fetch(`/api/payments?v=${encodeURIComponent(version)}`).then((r) => {
       if (!r.ok) throw new Error(`payments ${r.status}`);
       return r.json() as Promise<Payment[]>;
     });
-    p.catch(() => {
-      if (inflight === p) inflight = null;
-    });
+    p.then(
+      (rows) => {
+        cachedAll = rows;
+      },
+      () => {
+        if (inflight === p) inflight = null;
+      },
+    );
     inflight = p;
   }
   return inflight;
 }
 
-export function PaymentsView({ initialRows, initialTotal, counts, now }: PaymentsViewProps) {
-  const [all, setAll] = useState<Payment[] | null>(null);
+type LoadStatus = "loading" | "ready" | "error";
+const RETRY_DELAYS_MS = [1000, 3000, 10000];
+
+export function PaymentsView({ initialRows, initialTotal, counts, now, dataVersion }: PaymentsViewProps) {
+  const [all, setAll] = useState<Payment[] | null>(cachedAll);
+  const [status, setStatus] = useState<LoadStatus>(cachedAll ? "ready" : "loading");
+  const retryRef = useRef<() => void>(() => {});
   useEffect(() => {
     let live = true;
-    loadAll().then(
-      (rows) => {
-        if (live) setAll(rows);
-      },
-      () => {},
-    );
+    let state: LoadStatus = cachedAll ? "ready" : "loading";
+    let tries = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const set = (s: LoadStatus) => {
+      state = s;
+      setStatus(s);
+    };
+    const attempt = () => {
+      clearTimeout(timer);
+      set("loading");
+      loadAll(dataVersion).then(
+        (rows) => {
+          if (!live) return;
+          setAll(rows);
+          set("ready");
+        },
+        () => {
+          if (!live) return;
+          set("error");
+          if (tries < RETRY_DELAYS_MS.length) timer = setTimeout(attempt, RETRY_DELAYS_MS[tries++]);
+        },
+      );
+    };
+    const retry = () => {
+      if (state !== "error") return;
+      tries = 0;
+      attempt();
+    };
+    retryRef.current = retry;
+    if (state !== "ready") attempt();
+    window.addEventListener("online", retry);
+    window.addEventListener("focus", retry);
     return () => {
       live = false;
+      clearTimeout(timer);
+      window.removeEventListener("online", retry);
+      window.removeEventListener("focus", retry);
     };
-  }, []);
+  }, [dataVersion]);
 
   const initial = useMemo(
     () => ({
@@ -84,7 +133,7 @@ export function PaymentsView({ initialRows, initialTotal, counts, now }: Payment
           <Button icon="gear">Edit columns</Button>
         </div>
       </div>
-      <div className="mt-4" aria-busy={pending || undefined}>
+      <div className="mt-4" aria-busy={(status === "loading" && pending) || undefined}>
         <PaymentsTable rows={result.rows} sort={query.sort} onSortChange={onSortChange} now={now} />
       </div>
       <TableFooter
@@ -93,6 +142,20 @@ export function PaymentsView({ initialRows, initialTotal, counts, now }: Payment
         onPageSizeChange={(pageSize) => update({ pageSize })}
         onPageChange={setPage}
       />
+      <div role="status" aria-live="polite">
+        {status === "error" && (
+          <p className="mt-2 text-caption leading-4 text-text-secondary">
+            Couldn&apos;t load all payments.{" "}
+            <button
+              type="button"
+              onClick={() => retryRef.current()}
+              className="cursor-pointer rounded-sm text-brand hover:text-brand-hover focus-visible:shadow-focus"
+            >
+              Retry
+            </button>
+          </p>
+        )}
+      </div>
     </AppShell>
   );
 }

@@ -88,4 +88,18 @@ describe("usePaymentsQuery", () => {
       expect(result.current.result).toEqual(applyQuery(ALL, { ...DEFAULT_QUERY, tab: "failed" }, MOCK_NOW));
     });
   });
+  it("setPage while data is null keeps server rows, then applies once data arrives", () => {
+    const initial = {
+      result: { rows: ALL.slice(0, 25), total: 600, page: 0, pageCount: 24 },
+      counts: tabCounts(ALL),
+    };
+    const { result, rerender } = renderHook(({ all }: { all: Payment[] | null }) => usePaymentsQuery(all, MOCK_NOW, initial), {
+      initialProps: { all: null as Payment[] | null },
+    });
+    act(() => result.current.setPage(1));
+    expect(result.current.result.rows).toBe(initial.result.rows);
+    rerender({ all: ALL });
+    expect(result.current.result.page).toBe(1);
+    expect(result.current.result.rows[0]).toBe(ALL[25]);
+  });
 });

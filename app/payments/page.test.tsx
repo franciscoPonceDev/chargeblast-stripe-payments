@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, it, expect, vi } from "vitest";
 import data from "@/data/payments.json";
 import { tabCounts } from "@/lib/payments/query";
 import type { Payment } from "@/lib/payments/types";
+import { __resetPaymentsCacheForTests } from "@/components/payments/PaymentsView";
 import PaymentsPage from "./page";
 
 // RTL's asyncWrapper only flushes fake timers when it detects Jest. Under Vitest it
@@ -17,8 +18,10 @@ import PaymentsPage from "./page";
 describe("PaymentsPage", { timeout: 30_000 }, () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    __resetPaymentsCacheForTests();
     // The island fetches the full dataset from the static /api/payments route after hydration.
-    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: true, status: 200, json: async () => data })));
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify(data), { status: 200, headers: { "content-type": "application/json" } })),
+    );
   });
   afterEach(() => {
     vi.unstubAllGlobals();

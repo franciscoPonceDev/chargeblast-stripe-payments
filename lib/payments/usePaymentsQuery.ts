@@ -26,8 +26,14 @@ const EMPTY: InitialPayments = {
  * `initial` result/counts are returned until it arrives. Updates made meanwhile
  * are kept in `query` and applied as soon as `all` lands.
  */
-export function usePaymentsQuery(all: Payment[] | null, now: number, initial: InitialPayments = EMPTY) {
-  const [query, setQuery] = useState<PaymentsQuery>(DEFAULT_QUERY);
+export function usePaymentsQuery(
+  all: Payment[] | null,
+  now: number,
+  initial: InitialPayments = EMPTY,
+  initialQuery: PaymentsQuery = DEFAULT_QUERY,
+) {
+  const [query, setQuery] = useState<PaymentsQuery>(initialQuery);
+  const [start] = useState(initialQuery);
   const counts: Record<StatusTab, number> = useMemo(
     () => (all ? tabCounts(all) : initial.counts),
     [all, initial.counts],
@@ -36,7 +42,7 @@ export function usePaymentsQuery(all: Payment[] | null, now: number, initial: In
     () => (all ? applyQuery(all, query, now) : initial.result),
     [all, query, now, initial.result],
   );
-  const pending = all === null && query !== DEFAULT_QUERY;
+  const pending = all === null && query !== start;
 
   const update = useCallback((patch: Partial<PaymentsQuery>) => {
     const keys = Object.keys(patch);
@@ -44,7 +50,9 @@ export function usePaymentsQuery(all: Payment[] | null, now: number, initial: In
     setQuery((q) => ({ ...q, ...patch, ...(pageOnly ? {} : { page: 0 }) }));
   }, []);
   const setPage = useCallback((n: number) => setQuery((q) => ({ ...q, page: n })), []);
+  /** Replace the whole query (used when the URL changes from outside). */
+  const replace = useCallback((q: PaymentsQuery) => setQuery(q), []);
   const reset = useCallback(() => setQuery(DEFAULT_QUERY), []);
 
-  return { query, result, counts, pending, update, setPage, reset };
+  return { query, result, counts, pending, update, setPage, replace, reset };
 }

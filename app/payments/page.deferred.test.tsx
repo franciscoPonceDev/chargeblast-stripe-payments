@@ -31,7 +31,7 @@ describe("PaymentsPage before the dataset arrives", { timeout: 30_000 }, () => {
     });
     vi.stubGlobal("fetch", vi.fn(() => pending));
 
-    render(await PaymentsPage());
+    render(await PaymentsPage({ searchParams: Promise.resolve({}) }));
     await act(async () => {});
     expect(screen.getByText("Viewing 1–25 of 600 results")).toBeInTheDocument();
 
@@ -46,7 +46,7 @@ describe("PaymentsPage before the dataset arrives", { timeout: 30_000 }, () => {
   it("requests the dataset URL with the content version", async () => {
     const fetchMock = vi.fn(async () => ok());
     vi.stubGlobal("fetch", fetchMock);
-    render(await PaymentsPage());
+    render(await PaymentsPage({ searchParams: Promise.resolve({}) }));
     await act(async () => {});
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect((fetchMock.mock.calls[0] as unknown as [string])[0]).toMatch(/^\/api\/payments\?v=[0-9a-f]{12}$/);
@@ -58,7 +58,7 @@ describe("PaymentsPage before the dataset arrives", { timeout: 30_000 }, () => {
   ])("when fetch %s: shows an error, Retry refetches and applies the queued query", async (_name, fail) => {
     const fetchMock = vi.fn().mockImplementationOnce(fail).mockImplementation(async () => ok());
     vi.stubGlobal("fetch", fetchMock);
-    render(await PaymentsPage());
+    render(await PaymentsPage({ searchParams: Promise.resolve({}) }));
     await act(async () => {});
 
     await user().click(screen.getByRole("tab", { name: "Failed" }));
@@ -76,7 +76,7 @@ describe("PaymentsPage before the dataset arrives", { timeout: 30_000 }, () => {
   it("retries automatically with backoff", async () => {
     const fetchMock = vi.fn().mockRejectedValueOnce(new Error("x")).mockImplementation(async () => ok());
     vi.stubGlobal("fetch", fetchMock);
-    render(await PaymentsPage());
+    render(await PaymentsPage({ searchParams: Promise.resolve({}) }));
     await act(async () => {});
     expect(fetchMock).toHaveBeenCalledTimes(1);
     await act(async () => {

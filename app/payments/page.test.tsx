@@ -5,6 +5,7 @@ import data from "@/data/payments.json";
 import { tabCounts } from "@/lib/payments/query";
 import type { Payment } from "@/lib/payments/types";
 import { __resetPaymentsCacheForTests } from "@/components/payments/PaymentsView";
+import { useRouter } from "next/navigation";
 import PaymentsPage from "./page";
 
 // RTL's asyncWrapper only flushes fake timers when it detects Jest. Under Vitest it
@@ -28,8 +29,10 @@ describe("PaymentsPage", { timeout: 30_000 }, () => {
     vi.useRealTimers();
   });
   // Render the async Server Component's output, then let the stubbed fetch resolve.
-  const renderPage = async () => {
-    render(await PaymentsPage());
+  const renderPage = async (params: Record<string, string> = {}) => {
+    // The mocked useSearchParams mirrors what the router would report for the same URL.
+    (globalThis as unknown as { setMockSearchParams: (s: string) => void }).setMockSearchParams(new URLSearchParams(params).toString());
+    render(await PaymentsPage({ searchParams: Promise.resolve(params) }));
     await act(async () => {});
   };
   // Fully fake timers; delay:null removes userEvent's internal setTimeout waits and
@@ -103,5 +106,50 @@ const user = () =>
     await renderPage();
     await user().click(screen.getByRole("button", { name: "Dismiss" }));
     expect(screen.getByRole("tab", { name: "All" })).toHaveFocus();
+  });
+
+  describe("URL state", () => {
+    const setUrl = (qs: string) => (globalThis as unknown as { setMockSearchParams: (s: string) => void }).setMockSearchParams(qs);
+    const failedCount = tabCounts(data as Payment[]).failed;
+
+    it("renders the filtered, paginated first page from the URL", async () => {
+      await renderPage({ tab: "failed", size: "50" });
+      expect(screen.getByRole("tab", { name: /Failed/ })).toHaveAttribute("aria-selected", "true");
+      expect(screen.getByText(`Viewing 1–${Math.min(50, failedCount)} of ${failedCount} results`)).toBeInTheDocument();
+      expect(screen.getByLabelText("Rows per page")).toHaveValue("50");
+      expect(useRouter().replace).not.toHaveBeenCalled();
+    });
+    it("clamps an out-of-range page from the URL", async () => {
+      await renderPage({ page: "9999" });
+      expect(screen.getByText("Viewing 576–600 of 600 results")).toBeInTheDocument();
+    });
+    it("writes filter changes to the URL with router.replace", async () => {
+      await renderPage();
+      await user().click(screen.getByRole("tab", { name: "Failed" }));
+      expect(useRouter().replace).toHaveBeenLastCalledWith("?tab=failed", { scroll: false });
+      await user().click(screen.getByRole("button", { name: "Next" }));
+      fireEvent.change(screen.getByLabelText("Rows per page"), { target: { value: "50" } });
+      expect(useRouter().replace).toHaveBeenLastCalledWith("?tab=failed&size=50", { scroll: false });
+      await user().click(screen.getByRole("tab", { name: "All" }));
+      fireEvent.change(screen.getByLabelText("Rows per page"), { target: { value: "25" } });
+      expect(useRouter().replace).toHaveBeenLastCalledWith("/payments", { scroll: false });
+    });
+    it("does not undo its own change when the URL echo arrives", async () => {
+      await renderPage();
+      await user().click(screen.getByRole("tab", { name: "Failed" }));
+      act(() => setUrl("tab=failed"));
+      expect(screen.getByRole("tab", { name: /Failed/ })).toHaveAttribute("aria-selected", "true");
+      expect(useRouter().replace).toHaveBeenCalledTimes(1);
+    });
+    it("applies an external URL change to the table", async () => {
+      await renderPage();
+      expect(screen.getByText("Viewing 1–25 of 600 results")).toBeInTheDocument();
+      act(() => setUrl("tab=failed&size=100"));
+      expect(screen.getByText(`Viewing 1–${Math.min(100, failedCount)} of ${failedCount} results`)).toBeInTheDocument();
+      expect(screen.getByLabelText("Rows per page")).toHaveValue("100");
+      expect(useRouter().replace).not.toHaveBeenCalled();
+      act(() => setUrl(""));
+      expect(screen.getByText("Viewing 1–25 of 600 results")).toBeInTheDocument();
+    });
   });
 });

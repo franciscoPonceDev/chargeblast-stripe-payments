@@ -1,4 +1,5 @@
 "use client";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppShell } from "@/components/shell/AppShell";
 import { Banner } from "@/components/payments/Banner";
@@ -9,13 +10,16 @@ import { PaymentsTable } from "@/components/payments/PaymentsTable";
 import { StatusTabs } from "@/components/payments/StatusTabs";
 import { TableFooter } from "@/components/payments/TableFooter";
 import { Button } from "@/components/ui";
-import { DEFAULT_QUERY, type SortState, type StatusTab } from "@/lib/payments/query";
+import { type PaymentsQuery, type SortState, type StatusTab } from "@/lib/payments/query";
+import { parseQuery, serializeQuery } from "@/lib/payments/url";
 import type { Payment } from "@/lib/payments/types";
 import { usePaymentsQuery } from "@/lib/payments/usePaymentsQuery";
 
 export interface PaymentsViewProps {
   initialRows: Payment[];
   initialTotal: number;
+  /** Query parsed from the URL, page already clamped to the server result. */
+  initialQuery: PaymentsQuery;
   counts: Record<StatusTab, number>;
   now: number;
   dataVersion: string;
@@ -53,7 +57,7 @@ function loadAll(version: string): Promise<Payment[]> {
 type LoadStatus = "loading" | "ready" | "error";
 const RETRY_DELAYS_MS = [1000, 3000, 10000];
 
-export function PaymentsView({ initialRows, initialTotal, counts, now, dataVersion }: PaymentsViewProps) {
+export function PaymentsView({ initialRows, initialTotal, initialQuery, counts, now, dataVersion }: PaymentsViewProps) {
   const [all, setAll] = useState<Payment[] | null>(cachedAll);
   const [status, setStatus] = useState<LoadStatus>(cachedAll ? "ready" : "loading");
   const retryRef = useRef<() => void>(() => {});
@@ -104,14 +108,39 @@ export function PaymentsView({ initialRows, initialTotal, counts, now, dataVersi
       result: {
         rows: initialRows,
         total: initialTotal,
-        page: DEFAULT_QUERY.page,
-        pageCount: Math.max(1, Math.ceil(initialTotal / DEFAULT_QUERY.pageSize)),
+        page: initialQuery.page,
+        pageCount: Math.max(1, Math.ceil(initialTotal / initialQuery.pageSize)),
       },
       counts,
     }),
-    [initialRows, initialTotal, counts],
+    [initialRows, initialTotal, initialQuery, counts],
   );
-  const { query, result, update, setPage, pending } = usePaymentsQuery(all, now, initial);
+  const { query, result, update, setPage, replace, pending } = usePaymentsQuery(all, now, initial, initialQuery);
+
+  // Keep the URL in step with the query (replace: no history spam) and the query in step with
+  // external URL changes (back/forward, in-app links). `synced` is the last query string we know
+  // the URL has or is about to have; `sent` are our own replaces whose echo hasn't arrived yet.
+  const router = useRouter();
+  const pathname = usePathname();
+  const urlString = useSearchParams()?.toString() ?? "";
+  const synced = useRef(serializeQuery(initialQuery).toString());
+  const seenUrl = useRef(urlString);
+  const sent = useRef(new Set<string>());
+  useEffect(() => {
+    const qs = serializeQuery(query).toString();
+    if (qs === synced.current) return;
+    synced.current = qs;
+    sent.current.add(qs);
+    router.replace(qs ? `?${qs}` : pathname, { scroll: false });
+  }, [query, router, pathname]);
+  useEffect(() => {
+    if (urlString === seenUrl.current) return;
+    seenUrl.current = urlString;
+    if (sent.current.delete(urlString) || urlString === synced.current) return;
+    synced.current = urlString;
+    sent.current.clear();
+    replace(parseQuery(new URLSearchParams(urlString)));
+  }, [urlString, replace]);
   const tabsRef = useRef<HTMLDivElement>(null);
   const onSortChange = useCallback((sort: SortState[]) => update({ sort }), [update]);
   const focusTabs = useCallback(() => {

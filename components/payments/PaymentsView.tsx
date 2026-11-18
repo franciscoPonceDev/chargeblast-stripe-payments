@@ -3,6 +3,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { AppShell } from "@/components/shell/AppShell";
 import { Banner } from "@/components/payments/Banner";
+import { ExportButton } from "@/components/payments/ExportButton";
 import { FilterBar } from "@/components/payments/filters/FilterBar";
 import { SearchInput } from "@/components/payments/filters/SearchInput";
 import { PageHeader } from "@/components/payments/PageHeader";
@@ -157,7 +158,7 @@ export function PaymentsView({ initialRows, initialTotal, initialQuery, counts, 
       <div className="mt-(--space-section) flex flex-wrap items-center justify-between gap-2">
         <FilterBar query={query} onChange={update} />
         <div className="flex items-center gap-2">
-          <Button icon="export">Export</Button>
+          <ExportButton all={all} status={status} query={query} now={now} />
           <Button icon="gear">Edit columns</Button>
         </div>
       </div>

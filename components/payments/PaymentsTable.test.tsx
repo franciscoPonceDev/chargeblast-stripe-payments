@@ -51,11 +51,13 @@ describe("PaymentsTable", () => {
     ]);
   });
 
-  it("renders the row action group next to the resting … button", () => {
+  it("renders inert row actions hidden from AT and out of the tab order", () => {
     setup();
-    expect(screen.getAllByRole("button", { name: "More options" })).toHaveLength(rows.length);
+    const decorative = screen.getAllByRole("button", { hidden: true }).filter((b) => b.closest("[aria-hidden='true']") || b.getAttribute("aria-hidden") === "true");
+    expect(decorative).toHaveLength(rows.length * 4);
+    for (const b of decorative) expect(b).toHaveAttribute("tabindex", "-1");
     for (const name of ["Refund payment", "Send receipt", "More actions"]) {
-      expect(screen.getAllByRole("button", { name })).toHaveLength(rows.length);
+      expect(screen.getAllByRole("button", { name, hidden: true })).toHaveLength(rows.length);
     }
   });
 
@@ -111,7 +113,7 @@ describe("PaymentsTable", () => {
     });
     expect(screen.getByText("•••• 6789")).toBeInTheDocument();
     expect(screen.getByRole("img", { name: "Apple Pay" })).toBeInTheDocument();
-    expect(screen.getByRole("img", { name: "mastercard" })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Mastercard" })).toBeInTheDocument();
   });
 
   it("shows dashes for null refunded/decline", () => {

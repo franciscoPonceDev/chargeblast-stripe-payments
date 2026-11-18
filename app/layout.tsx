@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Analytics } from "@/components/analytics/Analytics";
 import { Gtm } from "@/components/analytics/Gtm";
+import { Providers } from "@/components/ui/Providers";
 import { JsonLd, webApplicationLd } from "@/components/seo/JsonLd";
 import { allowIndexing, BRAND_COLOR, getSiteUrl, SITE_DESCRIPTION, SITE_NAME } from "@/lib/seo";
 
@@ -35,7 +36,7 @@ export default function RootLayout({
         <JsonLd data={webApplicationLd({ url: getSiteUrl(), name: SITE_NAME, description: SITE_DESCRIPTION })} />
         <Gtm />
         <Analytics />
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

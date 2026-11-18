@@ -14,6 +14,9 @@ const TABS: { id: StatusTab; label: string }[] = [
   { id: "uncaptured", label: "Uncaptured" },
 ];
 
+export const STATUS_PANEL_ID = "payments-panel";
+export const statusTabId = (t: StatusTab) => `status-tab-${t}`;
+
 export function StatusTabs({ value, onChange }: { value: StatusTab; onChange: (t: StatusTab) => void }) {
   function onKeyDown(e: KeyboardEvent<HTMLDivElement>) {
     const dir = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
@@ -34,6 +37,8 @@ export function StatusTabs({ value, onChange }: { value: StatusTab; onChange: (t
             key={t.id}
             type="button"
             role="tab"
+            id={statusTabId(t.id)}
+            aria-controls={STATUS_PANEL_ID}
             aria-selected={selected}
             tabIndex={selected ? 0 : -1}
             onClick={() => onChange(t.id)}

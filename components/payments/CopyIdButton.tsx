@@ -1,9 +1,11 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { Icon, Tooltip } from "@/components/ui";
+import { useAnnounce } from "@/components/ui/Announcer";
 import { track } from "@/lib/analytics/events";
 
 export function CopyIdButton({ id, visible = false }: { id: string; visible?: boolean }) {
+  const announce = useAnnounce();
   const [copied, setCopied] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const mounted = useRef(true);
@@ -23,6 +25,7 @@ export function CopyIdButton({ id, visible = false }: { id: string; visible?: bo
       track("payment_id_copied", {});
       if (!mounted.current) return;
       setCopied(true);
+      announce("Payment ID copied");
       clearTimeout(timer.current);
       timer.current = setTimeout(() => {
         if (mounted.current) setCopied(false);
@@ -45,9 +48,11 @@ export function CopyIdButton({ id, visible = false }: { id: string; visible?: bo
           <Icon name="copy" size={12} />
         </button>
       </Tooltip>
-      <span role="status" className={copied ? "ml-1 text-caption text-text-secondary" : "sr-only"}>
-        {copied ? "Copied" : ""}
-      </span>
+      {copied && (
+        <span aria-hidden="true" className="ml-1 text-caption text-text-secondary">
+          Copied
+        </span>
+      )}
     </span>
   );
 }

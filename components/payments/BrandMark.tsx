@@ -4,11 +4,13 @@ import { spriteId } from "./brandIds";
 
 // Card art lives in BrandSprite (server-rendered once per page). Wallet glyphs: simple-icons path data (CC0-1.0). See THIRD_PARTY_NOTICES.md.
 
+const BRAND_NAMES: Record<CardBrand, string> = { visa: "Visa", mastercard: "Mastercard", amex: "American Express", discover: "Discover" };
+
 const BASE = "inline-flex align-middle h-4 w-6 shrink-0 items-center justify-center overflow-hidden rounded-sm";
 
 export function BrandMark({ brand }: { brand: CardBrand }) {
   return (
-    <span className={BASE} role="img" aria-label={brand}>
+    <span className={BASE} role="img" aria-label={BRAND_NAMES[brand] ?? brand}>
       <svg width={24} height={16} aria-hidden="true" focusable="false">
         <use href={`#${spriteId(brand)}`} width={24} height={16} />
       </svg>

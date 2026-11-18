@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { StatusTabs } from "./StatusTabs";
+import { STATUS_PANEL_ID, StatusTabs } from "./StatusTabs";
 
 describe("StatusTabs", () => {
   it("renders six tabs in order with the selected one marked", () => {
@@ -10,6 +10,10 @@ describe("StatusTabs", () => {
     expect(tabs.map((t) => t.textContent)).toEqual(["All", "Succeeded", "Refunded", "Disputed", "Failed", "Uncaptured"]);
     expect(screen.getByRole("tab", { name: "Refunded" })).toHaveAttribute("aria-selected", "true");
     expect(screen.getByRole("tab", { name: "All" })).toHaveAttribute("aria-selected", "false");
+  });
+  it("points every tab at the shared tabpanel", () => {
+    render(<StatusTabs value="all" onChange={() => {}} />);
+    for (const t of screen.getAllByRole("tab")) expect(t).toHaveAttribute("aria-controls", STATUS_PANEL_ID);
   });
   it("calls onChange on click", async () => {
     const onChange = vi.fn();

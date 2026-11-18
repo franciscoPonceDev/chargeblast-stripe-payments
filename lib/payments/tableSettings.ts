@@ -33,7 +33,7 @@ export function useTableSettings() {
   const [settings, setSettings] = useState<TableSettings>(DEFAULT_TABLE_SETTINGS);
   const [loaded, setLoaded] = useState(false);
 
-  // Trade-off: read after mount so SSR and first client render match; a saved layout appears after a brief flash.
+  // Trade-off: read after mount so SSR and first client render match; a pre-paint script (settingsScript) applies a saved layout before first paint.
   useEffect(() => {
     const read = () => {
       try {

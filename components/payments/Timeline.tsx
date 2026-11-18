@@ -23,7 +23,7 @@ export function Timeline({ events, now }: { events: TimelineEvent[]; now: number
             <div className="font-semibold text-text-primary">{e.label}</div>
             {e.detail && <div className="text-caption text-text-muted">{e.detail}</div>}
             <Tooltip content={<RelativeTime ms={e.at} now={now} />}>
-              <time dateTime={new Date(e.at).toISOString()} className="text-caption text-text-secondary">
+              <time dateTime={new Date(e.at).toISOString()} tabIndex={0} className="rounded-sm text-caption text-text-secondary focus-visible:shadow-focus">
                 {formatDateTime(e.at, now)}
               </time>
             </Tooltip>

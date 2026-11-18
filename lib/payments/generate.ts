@@ -46,21 +46,21 @@ function weighted<T>(rng: Rng, entries: ReadonlyArray<readonly [T, number]>): T 
 }
 
 const FIRST_NAMES = [
-  'santiago', 'laura', 'sofia', 'juan', 'maria', 'samantha', 'james', 'olivia', 'liam', 'emma',
+  'santiago', 'elena', 'sofia', 'juan', 'maria', 'samantha', 'james', 'olivia', 'liam', 'emma',
   'noah', 'ava', 'lucas', 'mia', 'ethan', 'isabella', 'daniel', 'camila', 'matthew', 'chloe',
   'david', 'priya', 'arjun', 'hannah', 'oliver', 'amelia', 'carlos', 'lucia', 'diego', 'fatima',
   'yuki', 'kenji', 'anna', 'peter', 'sarah', 'michael', 'laura', 'thomas', 'nina', 'rafael',
 ];
 const LAST_NAMES = [
-  'laura', 'reed', 'garcia', 'smith', 'johnson', 'williams', 'brown', 'jones', 'miller', 'davis',
+  'bennett', 'foster', 'garcia', 'smith', 'johnson', 'williams', 'brown', 'jones', 'miller', 'davis',
   'rodriguez', 'martinez', 'hernandez', 'lopez', 'wilson', 'anderson', 'taylor', 'moore', 'jackson', 'martin',
   'lee', 'perez', 'thompson', 'white', 'harris', 'clark', 'lewis', 'robinson', 'walker', 'young',
   'patel', 'nguyen', 'kim', 'silva', 'santos', 'oliveira', 'tanaka', 'sato', 'schmidt', 'muller',
 ];
-const FREE_DOMAINS = ['gmail.com', 'outlook.com', 'hotmail.com', 'yahoo.com', 'icloud.com', 'hotmail.co.uk'];
+const FREE_DOMAINS = ['example.com', 'example.net', 'example.org', 'mail.example', 'inbox.example', 'webmail.test'];
 const CUSTOM_DOMAINS = [
-  'example.com', 'brightpath.io', 'northwind.co', 'acmeworks.com', 'kestrelhq.com', 'lumenlabs.dev',
-  'oakridgepartners.com', 'tidewater.net', 'pinecrest.org', 'verdantcap.com', 'stackforge.io', 'harborlane.co',
+  'lawn.example', 'brightpath.example', 'northwind.example', 'acmeworks.example', 'kestrel.example', 'lumenlabs.example',
+  'oakridge.example', 'tidewater.example', 'pinecrest.example', 'verdant.example', 'stackforge.example', 'harborlane.example',
 ];
 
 function titleCase(s: string): string {

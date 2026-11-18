@@ -10,7 +10,7 @@ export default async function PaymentsPage({
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   // Trade-off: reading searchParams makes this route dynamic; correct first paint for shared links > static HTML.
-  const parsed =parseQuery((await searchParams) ?? {});
+  const parsed = parseQuery((await searchParams) ?? {});
   const { rows, total, page } = applyQuery(ALL_PAYMENTS, parsed, MOCK_NOW);
   return (
     <PaymentsView

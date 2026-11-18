@@ -1,4 +1,3 @@
-import { isValid, parseISO } from 'date-fns';
 import {
   DEFAULT_QUERY,
   STATUS_LABELS,
@@ -24,13 +23,13 @@ const MAX_PAGE = 1_000_000;
 
 export type RawSearchParams = URLSearchParams | Record<string, string | string[] | undefined>;
 
-const DEFAULT_SORT_STR = 'created.desc';
 const sortToString = (sort: SortState[]) => sort.map((s) => `${s.id}.${s.desc ? 'desc' : 'asc'}`).join(',');
+const DEFAULT_SORT_STR = sortToString(DEFAULT_QUERY.sort);
 
 export function serializeQuery(q: PaymentsQuery): URLSearchParams {
   const sp = new URLSearchParams();
   if (q.tab !== DEFAULT_QUERY.tab) sp.set('tab', q.tab);
-  if (q.search) sp.set('q', q.search);
+  if (q.search) sp.set('q', q.search.slice(0, MAX_SEARCH));
   if (q.statuses.length) sp.set('status', q.statuses.join(','));
   if (q.methods.length) sp.set('method', q.methods.join(','));
   if (q.currencies.length) sp.set('currency', q.currencies.join(','));
@@ -73,11 +72,17 @@ function parseList<T extends string>(v: string | undefined, allowed: readonly T[
   return out;
 }
 
-const DAY = /^\d{4}-\d{2}-\d{2}$/;
+const DAY = /^(\d{4})-(\d{2})-(\d{2})$/;
+/** Calendar validity of 'yyyy-MM-dd', independent of the process timezone (UTC round trip). */
+export function isRealDay(v: string): boolean {
+  const m = DAY.exec(v);
+  if (!m) return false;
+  const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  const t = new Date(Date.UTC(y, mo - 1, d));
+  return t.getUTCFullYear() === y && t.getUTCMonth() === mo - 1 && t.getUTCDate() === d;
+}
 function parseDay(v: string | undefined): string | null {
-  if (!v || !DAY.test(v)) return null;
-  const d = parseISO(v);
-  return isValid(d) && d.toISOString().startsWith(v) ? v : null;
+  return v && isRealDay(v) ? v : null;
 }
 
 function parseDate(get: (k: string) => string | undefined): DateFilter {
@@ -86,6 +91,7 @@ function parseDate(get: (k: string) => string | undefined): DateFilter {
   if (d === 'custom') {
     const from = parseDay(get('from'));
     const to = parseDay(get('to'));
+    if (from && to && from > to) return { preset: 'custom', from: to, to: from }; // yyyy-MM-dd sorts lexically
     if (from || to) return { preset: 'custom', from, to };
   }
   return DEFAULT_QUERY.date;
@@ -105,7 +111,7 @@ function parseAmount(v: string | undefined): AmountFilter {
   if (b) {
     const min = Number(b[1]);
     const max = Number(b[2]);
-    if (Number.isFinite(min) && Number.isFinite(max)) return { op: 'between', min, max };
+    if (Number.isFinite(min) && Number.isFinite(max)) return { op: 'between', min: Math.min(min, max), max: Math.max(min, max) };
   }
   return DEFAULT_QUERY.amount;
 }
@@ -127,7 +133,8 @@ export function parseQuery(raw: RawSearchParams): PaymentsQuery {
   const get = getter(raw);
   const tab = get('tab');
   const page = get('page');
-  const size = Number(get('size'));
+  const sizeRaw = get('size');
+  const size = sizeRaw && /^\d+$/.test(sizeRaw) ? Number(sizeRaw) : NaN;
   return {
     tab: TABS.includes(tab as StatusTab) ? (tab as StatusTab) : DEFAULT_QUERY.tab,
     search: (get('q') ?? '').slice(0, MAX_SEARCH),

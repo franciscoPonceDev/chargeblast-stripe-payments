@@ -141,6 +141,47 @@ const user = () =>
       expect(screen.getByRole("tab", { name: /Failed/ })).toHaveAttribute("aria-selected", "true");
       expect(useRouter().replace).toHaveBeenCalledTimes(1);
     });
+    it("adopts an external navigation to an earlier URL when only the last echo arrived", async () => {
+      await renderPage();
+      await user().click(screen.getByRole("tab", { name: "Failed" }));
+      fireEvent.change(screen.getByLabelText("Rows per page"), { target: { value: "50" } });
+      expect(useRouter().replace).toHaveBeenLastCalledWith("?tab=failed&size=50", { scroll: false });
+      act(() => setUrl("tab=failed&size=50")); // Next skipped the intermediate ?tab=failed
+      expect(screen.getByLabelText("Rows per page")).toHaveValue("50");
+      act(() => setUrl("tab=failed"));
+      expect(screen.getByLabelText("Rows per page")).toHaveValue("25");
+      expect(screen.getByRole("tab", { name: /Failed/ })).toHaveAttribute("aria-selected", "true");
+    });
+    it("adopts an external navigation after a change was reverted with no echo", async () => {
+      await renderPage();
+      await user().click(screen.getByRole("tab", { name: "Failed" }));
+      await user().click(screen.getByRole("tab", { name: "All" }));
+      act(() => setUrl("tab=refunded"));
+      expect(screen.getByRole("tab", { name: /Refunded/ })).toHaveAttribute("aria-selected", "true");
+    });
+    it("writes the page number (1-based) when paginating", async () => {
+      await renderPage();
+      await user().click(screen.getByRole("button", { name: "Next" }));
+      expect(useRouter().replace).toHaveBeenLastCalledWith("?page=2", { scroll: false });
+    });
+    it("writes typed search to q and survives special characters and the echo", async () => {
+      await renderPage();
+      const text = "a+b@x.com & ü";
+      await user().type(screen.getAllByLabelText("Search")[0], text);
+      await act(async () => {
+        vi.advanceTimersByTime(250);
+      });
+      const arg = (useRouter().replace as unknown as { mock: { lastCall: [string] } }).mock.lastCall[0];
+      expect(new URLSearchParams(arg.slice(1)).get("q")).toBe(text);
+      act(() => setUrl(arg.slice(1)));
+      expect(screen.getAllByLabelText("Search")[0]).toHaveValue(text);
+      expect(useRouter().replace).toHaveBeenCalledTimes(1);
+    });
+    it("rewrites a non-canonical URL once on mount", async () => {
+      await renderPage({ page: "9999", size: "bogus" });
+      expect(useRouter().replace).toHaveBeenCalledTimes(1);
+      expect(useRouter().replace).toHaveBeenCalledWith("?page=24", { scroll: false });
+    });
     it("applies an external URL change to the table", async () => {
       await renderPage();
       expect(screen.getByText("Viewing 1–25 of 600 results")).toBeInTheDocument();

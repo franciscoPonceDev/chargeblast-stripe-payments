@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_QUERY, type PaymentsQuery } from "./query";
-import { parseQuery, serializeQuery } from "./url";
+import { isRealDay, parseQuery, serializeQuery } from "./url";
 
 const rich: PaymentsQuery = {
   tab: "failed",
@@ -103,5 +103,33 @@ describe("payments URL state", () => {
       tab: "failed",
       pageSize: 100,
     });
+  });
+  it("validates calendar days without depending on the timezone", () => {
+    for (const d of ["2026-10-01", "2024-02-29", "2026-12-31", "2026-01-01"]) expect(isRealDay(d)).toBe(true);
+    for (const d of ["2026-02-29", "2026-13-01", "2026-00-10", "2026-04-31", "26-01-01", "2026-1-1", "x"]) expect(isRealDay(d)).toBe(false);
+    const tz = process.env.TZ;
+    try {
+      for (const z of ["Asia/Tokyo", "Pacific/Kiritimati", "America/Los_Angeles"]) {
+        process.env.TZ = z;
+        expect(p("date=custom&from=2026-10-01&to=2026-10-02").date).toEqual({ preset: "custom", from: "2026-10-01", to: "2026-10-02" });
+      }
+    } finally {
+      process.env.TZ = tz;
+    }
+  });
+  it("normalises reversed ranges", () => {
+    expect(p("amount=between:20-10").amount).toEqual({ op: "between", min: 10, max: 20 });
+    expect(p("date=custom&from=2026-10-31&to=2026-10-01").date).toEqual({ preset: "custom", from: "2026-10-01", to: "2026-10-31" });
+  });
+  it("rejects loose numeric forms and caps search length", () => {
+    for (const qs of ["size=5e1", "size=+50", "size=50.0", "page=1e1", "page=+2"]) expect(p(qs)).toEqual(DEFAULT_QUERY);
+    const long = "x".repeat(500);
+    expect(serializeQuery({ ...DEFAULT_QUERY, search: long }).get("q")).toHaveLength(200);
+    expect(p(`q=${long}`).search).toHaveLength(200);
+  });
+  it("round-trips special characters in search", () => {
+    const search = "a+b@x.com & ü";
+    const qs = serializeQuery({ ...DEFAULT_QUERY, search }).toString();
+    expect(p(qs).search).toBe(search);
   });
 });

@@ -1,6 +1,6 @@
 "use client";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { AppShell } from "@/components/shell/AppShell";
 import { Banner } from "@/components/payments/Banner";
 import { FilterBar } from "@/components/payments/filters/FilterBar";
@@ -118,29 +118,27 @@ export function PaymentsView({ initialRows, initialTotal, initialQuery, counts, 
   const { query, result, update, setPage, replace, pending } = usePaymentsQuery(all, now, initial, initialQuery);
 
   // Keep the URL in step with the query (replace: no history spam) and the query in step with
-  // external URL changes (back/forward, in-app links). `synced` is the last query string we know
-  // the URL has or is about to have; `sent` are our own replaces whose echo hasn't arrived yet.
+  // external URL changes (back/forward, in-app links). `synced` is the last query string we wrote or
+  // adopted; URL changes seen while our own replace is pending are echoes, not navigation.
   const router = useRouter();
   const pathname = usePathname();
   const urlString = useSearchParams()?.toString() ?? "";
-  const synced = useRef(serializeQuery(initialQuery).toString());
+  const [isPending, startTransition] = useTransition();
+  const synced = useRef(urlString); // starts as the real URL so a non-canonical link is rewritten once on mount
   const seenUrl = useRef(urlString);
-  const sent = useRef(new Set<string>());
   useEffect(() => {
     const qs = serializeQuery(query).toString();
     if (qs === synced.current) return;
     synced.current = qs;
-    sent.current.add(qs);
-    router.replace(qs ? `?${qs}` : pathname, { scroll: false });
+    startTransition(() => router.replace(qs ? `?${qs}` : pathname, { scroll: false }));
   }, [query, router, pathname]);
   useEffect(() => {
     if (urlString === seenUrl.current) return;
     seenUrl.current = urlString;
-    if (sent.current.delete(urlString) || urlString === synced.current) return;
+    if (isPending || urlString === synced.current) return;
     synced.current = urlString;
-    sent.current.clear();
     replace(parseQuery(new URLSearchParams(urlString)));
-  }, [urlString, replace]);
+  }, [urlString, isPending, replace]);
   const tabsRef = useRef<HTMLDivElement>(null);
   const onSortChange = useCallback((sort: SortState[]) => update({ sort }), [update]);
   const focusTabs = useCallback(() => {

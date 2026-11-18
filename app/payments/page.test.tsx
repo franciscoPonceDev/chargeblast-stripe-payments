@@ -9,7 +9,8 @@ import { useRouter } from "next/navigation";
 import PaymentsPage from "./page";
 
 // cookies() needs a request scope; the A/B cookie defaults to variant a.
-vi.mock("next/headers", () => ({ cookies: async () => ({ get: () => undefined }) }));
+const ab = vi.hoisted(() => ({ value: undefined as string | undefined }));
+vi.mock("next/headers", () => ({ cookies: async () => ({ get: () => (ab.value ? { value: ab.value } : undefined) }) }));
 
 // RTL's asyncWrapper only flushes fake timers when it detects Jest. Under Vitest it
 // awaits a real-looking setTimeout(0) that never fires with fake timers, so every
@@ -26,6 +27,7 @@ describe("PaymentsPage", { timeout: 30_000 }, () => {
     );
   });
   afterEach(() => {
+    ab.value = undefined;
     vi.unstubAllGlobals();
     vi.useRealTimers();
   });
@@ -42,6 +44,11 @@ describe("PaymentsPage", { timeout: 30_000 }, () => {
 const user = () =>
     userEvent.setup({ advanceTimers: vi.advanceTimersByTime, delay: null, pointerEventsCheck: 0 });
 
+  it("server-renders the banner CTA for the ab_banner cookie variant", async () => {
+    ab.value = "b";
+    await renderPage();
+    expect(screen.getByRole("button", { name: "Explore Sigma" })).toBeInTheDocument();
+  });
   it("renders the Transactions heading and section tabs", async () => {
     await renderPage();
     expect(screen.getByRole("heading", { name: "Transactions" })).toBeInTheDocument();

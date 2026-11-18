@@ -1,22 +1,31 @@
 // Typed event layer. Contract with GTM: every call pushes `{ event: name, ...params }` to window.dataLayer.
 // Trade-off: params carry counts and enums only; raw search text, emails, names and payment ids are never sent.
 
+import type { SortKey, StatusTab } from "@/lib/payments/query";
+import type { Variant } from "@/lib/experiments";
+
 type Empty = Record<string, never>;
+export type FilterName = "date" | "amount" | "currency" | "status" | "method" | "search";
 
 export interface AnalyticsEventMap {
-  filter_applied: { filter: string; value_count: number };
-  filter_cleared: { filter: string };
+  filter_applied: { filter: Exclude<FilterName, "search">; value_count: number };
+  filter_cleared: { filter: FilterName };
   search_performed: { query_length: number };
-  sort_changed: { column: string; direction: "asc" | "desc" };
+  sort_changed: { column: SortKey; direction: "asc" | "desc" };
   page_changed: { page: number; page_size: number };
   export_csv: { row_count: number };
   payment_id_copied: Empty;
   payment_opened: Empty;
-  status_tab_selected: { tab: string };
-  banner_cta_clicked: { variant: string };
+  status_tab_selected: { tab: StatusTab };
+  banner_cta_clicked: { variant: Variant };
   banner_dismissed: Empty;
-  experiment_viewed: { experiment: string; variant: string };
-  web_vitals: { name: string; value: number; rating: string; id: string };
+  experiment_viewed: { experiment: "banner_cta"; variant: Variant };
+  web_vitals: {
+    name: "CLS" | "INP" | "LCP" | "FCP" | "TTFB";
+    value: number;
+    rating: "good" | "needs-improvement" | "poor";
+    id: string;
+  };
 }
 
 export type AnalyticsAdapter = (name: string, params: Record<string, unknown>) => void;
@@ -35,7 +44,7 @@ export function registerAdapter(adapter: AnalyticsAdapter): () => void {
   return () => void adapters.delete(adapter);
 }
 
-export function track<K extends keyof AnalyticsEventMap>(name: K, params: AnalyticsEventMap[K]): void {
+export function track<K extends keyof AnalyticsEventMap>(name: K, params: AnalyticsEventMap[K] & { event?: never }): void {
   if (typeof window === "undefined") return;
   (window.dataLayer ??= []).push({ event: name, ...params });
   for (const a of adapters) {

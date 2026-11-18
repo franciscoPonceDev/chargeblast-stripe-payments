@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
+import { CONSENT_KEY } from "./consentKey";
 
-export const CONSENT_KEY = "consent.analytics.v1";
+export { CONSENT_KEY };
 
 type GtagWindow = Window & { gtag?: (...args: unknown[]) => void };
 
@@ -22,6 +23,19 @@ export function readConsent(): boolean {
   }
 }
 
+type Listener = (on: boolean) => void;
+const listeners = new Set<Listener>();
+
+/** Subscribe to consent changes (this tab, and other tabs once a consent hook is mounted). Returns unsubscribe. */
+export function onConsentChange(fn: Listener): () => void {
+  listeners.add(fn);
+  return () => void listeners.delete(fn);
+}
+
+function emit(on: boolean) {
+  listeners.forEach((l) => l(on));
+}
+
 export function setConsent(on: boolean): void {
   try {
     localStorage.setItem(CONSENT_KEY, on ? "granted" : "denied");
@@ -29,12 +43,25 @@ export function setConsent(on: boolean): void {
     /* state still applies for this page load */
   }
   gtag("consent", "update", { analytics_storage: on ? "granted" : "denied" });
+  emit(on);
 }
 
 // Trade-off: consent is denied by default and only read after mount, so SSR and first paint stay identical.
 export function useAnalyticsConsent(): [boolean, (on: boolean) => void] {
   const [on, setOn] = useState(false);
-  useEffect(() => setOn(readConsent()), []);
+  useEffect(() => {
+    setOn(readConsent());
+    // Cross-tab sync: another tab changed the stored choice.
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== CONSENT_KEY) return;
+      const v = e.newValue === "granted";
+      setOn(v);
+      gtag("consent", "update", { analytics_storage: v ? "granted" : "denied" });
+      emit(v);
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
   const set = useCallback((v: boolean) => {
     setOn(v);
     setConsent(v);

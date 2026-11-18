@@ -1,16 +1,14 @@
 "use client";
-import dynamic from "next/dynamic";
-import { useEffect } from "react";
-
-// Trade-off: web-vitals is code-split and loads after hydration to keep first-load JS small; its observers are buffered, so metrics are not lost.
-const WebVitals = dynamic(() => import("./WebVitals").then((m) => m.WebVitals), { ssr: false });
+import { useEffect, useState, type ComponentType } from "react";
 
 const POSTHOG_KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY;
 
 export function Analytics() {
+  const [WebVitals, setWebVitals] = useState<ComponentType | null>(null);
   useEffect(() => {
-    // Dynamic import keeps posthog-js out of the default bundle; it is fetched only when a key is set.
+    // Trade-off: web-vitals and posthog-js load via import() after hydration, keeping them out of first-load JS; observers are buffered, so early metrics are not lost.
+    void import("./WebVitals").then((m) => setWebVitals(() => m.WebVitals));
     if (POSTHOG_KEY) void import("@/lib/analytics/posthog").then((m) => m.initPosthog(POSTHOG_KEY));
   }, []);
-  return <WebVitals />;
+  return WebVitals ? <WebVitals /> : null;
 }

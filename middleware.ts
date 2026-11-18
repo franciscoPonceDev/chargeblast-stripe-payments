@@ -7,11 +7,22 @@ export function middleware(req: NextRequest) {
   crypto.getRandomValues(buf);
   const variant = assignVariant(buf[0] / 2 ** 32);
   // Forward the cookie on this request too, so the server render of the very first visit uses the same variant.
+  // Any invalid existing pair is stripped first so the assigned value is the only one the page can read.
   const headers = new Headers(req.headers);
-  const existing = headers.get("cookie");
-  headers.set("cookie", `${existing ? `${existing}; ` : ""}${BANNER_COOKIE}=${variant}`);
+  const rest = (headers.get("cookie") ?? "")
+    .split(";")
+    .map((c) => c.trim())
+    .filter((c) => c && !c.startsWith(`${BANNER_COOKIE}=`));
+  headers.set("cookie", [...rest, `${BANNER_COOKIE}=${variant}`].join("; "));
   const res = NextResponse.next({ request: { headers } });
-  res.cookies.set(BANNER_COOKIE, variant, { maxAge: 60 * 60 * 24 * 90, sameSite: "lax", path: "/" });
+  // httpOnly: only the server reads it (SSR copy), so scripts and GTM cannot. Secure in production.
+  res.cookies.set(BANNER_COOKIE, variant, {
+    maxAge: 60 * 60 * 24 * 90,
+    sameSite: "lax",
+    path: "/",
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+  });
   return res;
 }
 

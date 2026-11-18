@@ -23,6 +23,10 @@ describe("trackQueryPatch", () => {
     trackQueryPatch(DEFAULT_QUERY, { sort: [{ id: "amount", desc: false }] });
     expect(window.dataLayer).toEqual([{ event: "sort_changed", column: "amount", direction: "asc" }]);
   });
+  it("sort cleared to default emits nothing", () => {
+    trackQueryPatch({ ...DEFAULT_QUERY, sort: [{ id: "amount", desc: false }] }, { sort: DEFAULT_QUERY.sort });
+    expect(window.dataLayer).toEqual([]);
+  });
   it("tab change is tracked, unchanged values are not", () => {
     trackQueryPatch(DEFAULT_QUERY, { tab: "failed", statuses: [] });
     expect(window.dataLayer).toEqual([{ event: "status_tab_selected", tab: "failed" }]);

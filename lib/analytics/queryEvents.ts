@@ -25,8 +25,9 @@ export function trackQueryPatch(prev: PaymentsQuery, patch: Partial<PaymentsQuer
     else track("search_performed", { query_length: patch.search.length });
   }
   if (patch.tab !== undefined && patch.tab !== prev.tab) track("status_tab_selected", { tab: patch.tab });
-  if (patch.sort && !same(patch.sort, prev.sort)) {
-    const s = patch.sort[0] ?? DEFAULT_QUERY.sort[0];
+  if (patch.sort && !same(patch.sort, prev.sort) && !same(patch.sort, DEFAULT_QUERY.sort) && patch.sort[0]) {
+    // Cleared back to the default sort is not a user-chosen sort, so nothing is emitted.
+    const s = patch.sort[0];
     track("sort_changed", { column: s.id, direction: s.desc ? "desc" : "asc" });
   }
   if (patch.pageSize !== undefined && patch.pageSize !== prev.pageSize) {

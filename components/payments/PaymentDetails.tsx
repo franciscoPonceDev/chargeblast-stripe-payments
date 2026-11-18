@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 import { Button, Icon } from "@/components/ui";
 import { currencyCode, formatAmount, formatDateTime } from "@/lib/format";
@@ -6,6 +5,7 @@ import { feeFor, metadataFor, netFor, statementDescriptor } from "@/lib/payments
 import { STATUS_LABELS } from "@/lib/payments/query";
 import { buildTimeline } from "@/lib/payments/timeline";
 import type { Payment, PaymentMethod } from "@/lib/payments/types";
+import { BackToPayments } from "./BackToPayments";
 import { BrandSprite } from "./BrandSprite";
 import { CopyIdButton } from "./CopyIdButton";
 import { PaymentMethodCell } from "./PaymentMethodCell";
@@ -45,13 +45,10 @@ export function PaymentDetails({ payment: p, now }: { payment: Payment; now: num
     <div className="max-w-4xl">
       {p.method.brand && <BrandSprite brands={[p.method.brand]} />}
       <nav aria-label="Breadcrumb" className="mt-(--space-page-top)">
-        <Link
-          href="/payments"
-          className="inline-flex items-center gap-1 rounded-sm text-body font-semibold text-text-secondary hover:text-text-primary focus-visible:shadow-focus"
-        >
+        <BackToPayments className="inline-flex items-center gap-1 rounded-sm text-body font-semibold text-text-secondary hover:text-text-primary focus-visible:shadow-focus">
           <Icon name="chevron-down" size={12} className="rotate-90" />
           Payments
-        </Link>
+        </BackToPayments>
       </nav>
       <header className="mt-3 flex flex-wrap items-start justify-between gap-3">
         <div>

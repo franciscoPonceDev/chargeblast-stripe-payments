@@ -1,6 +1,6 @@
 process.env.TZ = "UTC";
 import "@testing-library/jest-dom/vitest";
-import { useSyncExternalStore } from "react";
+import React, { createElement, useSyncExternalStore, type ComponentProps } from "react";
 import { afterEach, vi } from "vitest";
 import { cleanup } from "@testing-library/react";
 
@@ -19,6 +19,16 @@ if (typeof globalThis.ResizeObserver === "undefined") {
   };
 }
 
+// Tooltip needs the app's single Tooltip.Provider (root layout); give each test-rendered Root one.
+vi.mock("@radix-ui/react-tooltip", async (importActual) => {
+  const actual = await importActual<typeof import("@radix-ui/react-tooltip")>();
+  return {
+    ...actual,
+    Root: (props: ComponentProps<typeof actual.Root>) =>
+      createElement(actual.Provider as React.FC<{ delayDuration: number; children?: React.ReactNode }>, { delayDuration: 300 }, createElement(actual.Root, props)),
+  };
+});
+
 // Client components call useRouter(); there is no mounted App Router under jsdom.
 // Tests assert navigation via `useRouter().push`/`replace`, which return this stable stub.
 const router = vi.hoisted(() => ({
@@ -32,6 +42,8 @@ const nav = vi.hoisted(() => {
     get: () => sp,
     set: (s: string) => {
       sp = new URLSearchParams(s);
+      // The component reads window.location to ignore stale router renders; keep it in step.
+      if (typeof window !== "undefined") History.prototype.replaceState.call(window.history, null, "", s ? `/payments?${s}` : "/payments");
       subs.forEach((f) => f());
     },
     subscribe: (f: () => void) => {

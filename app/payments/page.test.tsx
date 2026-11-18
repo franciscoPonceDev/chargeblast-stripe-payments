@@ -1,11 +1,10 @@
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, beforeEach, describe, it, expect, vi } from "vitest";
+import { afterEach, beforeEach, describe, it, expect, vi, type MockInstance } from "vitest";
 import data from "@/data/payments.json";
 import { tabCounts } from "@/lib/payments/query";
 import type { Payment } from "@/lib/payments/types";
 import { __resetPaymentsCacheForTests } from "@/components/payments/PaymentsView";
-import { useRouter } from "next/navigation";
 import PaymentsPage from "./page";
 
 // cookies() needs a request scope; the A/B cookie defaults to variant a.
@@ -119,41 +118,46 @@ const user = () =>
   describe("URL state", () => {
     const setUrl = (qs: string) => (globalThis as unknown as { setMockSearchParams: (s: string) => void }).setMockSearchParams(qs);
     const failedCount = tabCounts(data as Payment[]).failed;
+    let replaceState: MockInstance<History["replaceState"]>;
+    beforeEach(() => {
+      replaceState = vi.spyOn(window.history, "replaceState");
+    });
+    afterEach(() => replaceState.mockRestore());
 
     it("renders the filtered, paginated first page from the URL", async () => {
       await renderPage({ tab: "failed", size: "50" });
       expect(screen.getByRole("tab", { name: /Failed/ })).toHaveAttribute("aria-selected", "true");
       expect(screen.getByText(`Viewing 1–${Math.min(50, failedCount)} of ${failedCount} results`)).toBeInTheDocument();
       expect(screen.getByLabelText("Rows per page")).toHaveValue("50");
-      expect(useRouter().replace).not.toHaveBeenCalled();
+      expect(replaceState).not.toHaveBeenCalled();
     });
     it("clamps an out-of-range page from the URL", async () => {
       await renderPage({ page: "9999" });
       expect(screen.getByText("Viewing 576–600 of 600 results")).toBeInTheDocument();
     });
-    it("writes filter changes to the URL with router.replace", async () => {
+    it("writes filter changes to the URL with history.replaceState", async () => {
       await renderPage();
       await user().click(screen.getByRole("tab", { name: "Failed" }));
-      expect(useRouter().replace).toHaveBeenLastCalledWith("?tab=failed", { scroll: false });
+      expect(replaceState).toHaveBeenLastCalledWith(null, "", "?tab=failed");
       await user().click(screen.getByRole("button", { name: "Next" }));
       fireEvent.change(screen.getByLabelText("Rows per page"), { target: { value: "50" } });
-      expect(useRouter().replace).toHaveBeenLastCalledWith("?tab=failed&size=50", { scroll: false });
+      expect(replaceState).toHaveBeenLastCalledWith(null, "", "?tab=failed&size=50");
       await user().click(screen.getByRole("tab", { name: "All" }));
       fireEvent.change(screen.getByLabelText("Rows per page"), { target: { value: "25" } });
-      expect(useRouter().replace).toHaveBeenLastCalledWith("/payments", { scroll: false });
+      expect(replaceState).toHaveBeenLastCalledWith(null, "", "/payments");
     });
     it("does not undo its own change when the URL echo arrives", async () => {
       await renderPage();
       await user().click(screen.getByRole("tab", { name: "Failed" }));
       act(() => setUrl("tab=failed"));
       expect(screen.getByRole("tab", { name: /Failed/ })).toHaveAttribute("aria-selected", "true");
-      expect(useRouter().replace).toHaveBeenCalledTimes(1);
+      expect(replaceState).toHaveBeenCalledTimes(1);
     });
     it("adopts an external navigation to an earlier URL when only the last echo arrived", async () => {
       await renderPage();
       await user().click(screen.getByRole("tab", { name: "Failed" }));
       fireEvent.change(screen.getByLabelText("Rows per page"), { target: { value: "50" } });
-      expect(useRouter().replace).toHaveBeenLastCalledWith("?tab=failed&size=50", { scroll: false });
+      expect(replaceState).toHaveBeenLastCalledWith(null, "", "?tab=failed&size=50");
       act(() => setUrl("tab=failed&size=50")); // Next skipped the intermediate ?tab=failed
       expect(screen.getByLabelText("Rows per page")).toHaveValue("50");
       act(() => setUrl("tab=failed"));
@@ -170,7 +174,7 @@ const user = () =>
     it("writes the page number (1-based) when paginating", async () => {
       await renderPage();
       await user().click(screen.getByRole("button", { name: "Next" }));
-      expect(useRouter().replace).toHaveBeenLastCalledWith("?page=2", { scroll: false });
+      expect(replaceState).toHaveBeenLastCalledWith(null, "", "?page=2");
     });
     it("writes typed search to q and survives special characters and the echo", async () => {
       await renderPage();
@@ -179,16 +183,16 @@ const user = () =>
       await act(async () => {
         vi.advanceTimersByTime(250);
       });
-      const arg = (useRouter().replace as unknown as { mock: { lastCall: [string] } }).mock.lastCall[0];
+      const arg = replaceState.mock.lastCall![2] as string;
       expect(new URLSearchParams(arg.slice(1)).get("q")).toBe(text);
       act(() => setUrl(arg.slice(1)));
       expect(screen.getAllByLabelText("Search")[0]).toHaveValue(text);
-      expect(useRouter().replace).toHaveBeenCalledTimes(1);
+      expect(replaceState).toHaveBeenCalledTimes(1);
     });
     it("rewrites a non-canonical URL once on mount", async () => {
       await renderPage({ page: "9999", size: "bogus" });
-      expect(useRouter().replace).toHaveBeenCalledTimes(1);
-      expect(useRouter().replace).toHaveBeenCalledWith("?page=24", { scroll: false });
+      expect(replaceState).toHaveBeenCalledTimes(1);
+      expect(replaceState).toHaveBeenCalledWith(null, "", "?page=24");
     });
     it("applies an external URL change to the table", async () => {
       await renderPage();
@@ -196,7 +200,7 @@ const user = () =>
       act(() => setUrl("tab=failed&size=100"));
       expect(screen.getByText(`Viewing 1–${Math.min(100, failedCount)} of ${failedCount} results`)).toBeInTheDocument();
       expect(screen.getByLabelText("Rows per page")).toHaveValue("100");
-      expect(useRouter().replace).not.toHaveBeenCalled();
+      expect(replaceState).not.toHaveBeenCalled();
       act(() => setUrl(""));
       expect(screen.getByText("Viewing 1–25 of 600 results")).toBeInTheDocument();
     });

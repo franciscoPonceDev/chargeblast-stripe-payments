@@ -1,6 +1,6 @@
 "use client";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AppShell } from "@/components/shell/AppShell";
 import { Banner } from "@/components/payments/Banner";
 import { EditColumns } from "@/components/payments/EditColumns";
@@ -9,13 +9,14 @@ import { FilterBar } from "@/components/payments/filters/FilterBar";
 import { SearchInput } from "@/components/payments/filters/SearchInput";
 import { PageHeader } from "@/components/payments/PageHeader";
 import { PaymentsTable } from "@/components/payments/PaymentsTable";
-import { StatusTabs } from "@/components/payments/StatusTabs";
+import { STATUS_PANEL_ID, StatusTabs, statusTabId } from "@/components/payments/StatusTabs";
 import { TableFooter } from "@/components/payments/TableFooter";
 import { track } from "@/lib/analytics/events";
 import { trackQueryPatch } from "@/lib/analytics/queryEvents";
 import type { Variant } from "@/lib/experiments";
 import { useTableSettings } from "@/lib/payments/tableSettings";
 import { type PaymentsQuery, type SortState, type StatusTab } from "@/lib/payments/query";
+import { saveListUrl } from "@/lib/payments/lastListUrl";
 import { parseQuery, serializeQuery } from "@/lib/payments/url";
 import type { Payment } from "@/lib/payments/types";
 import { usePaymentsQuery } from "@/lib/payments/usePaymentsQuery";
@@ -122,7 +123,16 @@ export function PaymentsView({ initialRows, initialTotal, initialQuery, counts, 
     }),
     [initialRows, initialTotal, initialQuery, counts],
   );
-  const { query, result, update: updateQuery, setPage: setQueryPage, replace, pending } = usePaymentsQuery(all, now, initial, initialQuery);
+  // Props can be stale when the view remounts from the router cache (back from details after native
+  // replaceState edits), so the address bar wins over `initialQuery`.
+  const pathname = usePathname();
+  const urlString = useSearchParams()?.toString() ?? "";
+  const startQuery = useMemo(() => {
+    const raw = parseQuery(new URLSearchParams(urlString));
+    const fromUrl = { ...raw, page: Math.min(raw.page, Math.max(0, Math.ceil(initialTotal / raw.pageSize) - 1)) };
+    return serializeQuery(fromUrl).toString() === serializeQuery(initialQuery).toString() ? initialQuery : fromUrl;
+  }, [urlString, initialQuery, initialTotal]);
+  const { query, result, update: updateQuery, setPage: setQueryPage, replace, pending } = usePaymentsQuery(all, now, initial, startQuery);
   const queryRef = useRef(query);
   queryRef.current = query;
   const update = useCallback(
@@ -140,28 +150,26 @@ export function PaymentsView({ initialRows, initialTotal, initialQuery, counts, 
     [setQueryPage],
   );
 
-  // Keep the URL in step with the query (replace: no history spam) and the query in step with
-  // external URL changes (back/forward, in-app links). `synced` is the last query string we wrote or
-  // adopted; URL changes seen while our own replace is pending are echoes, not navigation.
-  const router = useRouter();
-  const pathname = usePathname();
-  const urlString = useSearchParams()?.toString() ?? "";
-  const [isPending, startTransition] = useTransition();
+  // Keep the URL in step with the query (native replaceState: Next syncs useSearchParams without a
+  // server round trip) and the query in step with URL changes we did not make (back/forward, links).
+  // `synced` is the last query string we wrote or adopted; a seen URL that equals it is an echo.
   const synced = useRef(urlString); // starts as the real URL so a non-canonical link is rewritten once on mount
-  const seenUrl = useRef(urlString);
+  const qs = serializeQuery(query).toString();
   useEffect(() => {
-    const qs = serializeQuery(query).toString();
     if (qs === synced.current) return;
     synced.current = qs;
-    startTransition(() => router.replace(qs ? `?${qs}` : pathname, { scroll: false }));
-  }, [query, router, pathname]);
+    window.history.replaceState(null, "", qs ? `?${qs}` : pathname);
+  }, [qs, pathname]);
   useEffect(() => {
-    if (urlString === seenUrl.current) return;
-    seenUrl.current = urlString;
-    if (isPending || urlString === synced.current) return;
+    saveListUrl(qs ? `${pathname}?${qs}` : pathname);
+  }, [qs, pathname]);
+  useEffect(() => {
+    if (urlString === synced.current) return;
+    // A stale render of an earlier write of ours: the address bar already moved on.
+    if (new URLSearchParams(window.location.search).toString() !== urlString) return;
     synced.current = urlString;
     replace(parseQuery(new URLSearchParams(urlString)));
-  }, [urlString, isPending, replace]);
+  }, [urlString, replace]);
   const { settings, setColumnVisible, setWrap, reset: resetSettings } = useTableSettings();
   const tabsRef = useRef<HTMLDivElement>(null);
   const onSortChange = useCallback((sort: SortState[]) => update({ sort }), [update]);
@@ -189,7 +197,7 @@ export function PaymentsView({ initialRows, initialTotal, initialQuery, counts, 
           />
         </div>
       </div>
-      <div className="mt-4" aria-busy={(status === "loading" && pending) || undefined}>
+      <div id={STATUS_PANEL_ID} role="tabpanel" aria-labelledby={statusTabId(query.tab)} className="mt-4" aria-busy={(status === "loading" && pending) || undefined}>
         <PaymentsTable rows={result.rows} sort={query.sort} onSortChange={onSortChange} now={now} hiddenColumns={settings.hidden} wrap={settings.wrap} />
       </div>
       <TableFooter

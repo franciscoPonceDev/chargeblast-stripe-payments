@@ -43,7 +43,6 @@ function MultiSelectForm<T extends string>({
   );
 }
 
-/** Pill + popover for a multi-select filter writing a string[] value. */
 export function MultiSelectFilter<T extends string>({
   label,
   options,
